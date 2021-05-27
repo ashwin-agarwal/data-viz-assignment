@@ -1,0 +1,98 @@
+<!--
+  Data Exploration Project
+  Author: Ashwin Agarwal  
+  Date created: 26-May-21
+  Last update: 
+
+  References:  
+  - Cover page template from Bootstrap: https://getbootstrap.com/docs/5.0/examples/cover/
+  - Template by: @mdo (https://twitter.com/mdo)
+
+-->
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <title>Analyzing the trending videos on YouTube</title>
+
+    <script src="./js/bootstrap.min.js"></script>
+    <script src="./js/jquery-3.6.0.min.js"></script>
+    <script src="./js/main.js"></script>
+
+    <!-- Load d3.js and the geo projection plugin -->
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+
+    <link rel="stylesheet" href="./css/style1.css" />
+    <link rel="stylesheet" href="./css/bootstrap.min.css" />
+    <link rel="shortcut icon" href="./images/favicon.ico" />
+</head>
+
+<body>
+    <header class="mb-auto p-4 fixed-top bg-white">
+        <div>
+            <h3 class="float-md-start mb-0">YouTube Trends</h3>
+            <nav class="nav nav-masthead justify-content-center float-md-end">
+                <a class="nav-link" href="#home">Home</a>
+                <a class="nav-link" href="#by-region">By Region</a>
+                <a class="nav-link" href="#by-engagement">By Engagement</a>
+                <a class="nav-link" href="#by-channel">By Channel</a>
+                <a class="nav-link" href="#references">References</a>
+            </nav>
+        </div>
+    </header>
+
+
+    <main>
+        <div id="home" class="bg-custom text-center">
+            <div>
+                <h1>Analyzing the trending videos on YouTube</h1>
+                <p class="lead">This project analyzes the YouTube trending videos dataset. The visualizations in this page <br/>will help content creators, looking to advertise or create content on/for YouTube,<br/> in targeting the right videos, channels, and categories.</p>
+                <p class="lead">
+                    <a href="#by-region" class="btn btn-lg btn-learn-more fw-bold border-white bg-white ">Get Started</a>
+                </p>
+            </div>
+        </div>
+        <div id="by-region">
+            <div class="p-4">
+                <h3>Trending videos by Region</h3>
+                <p>The following visualization shows the trending videos by region.</p>
+
+                <svg id="bubble_map" width="630" height="350"></svg>
+            </div>
+        </div>
+        <div id="by-engagement">
+            <div class="p-4">
+                <h3>Trending videos by Engagement</h3>
+                <p></p>
+            </div>
+        </div>
+        <div id="by-channel">
+            <div class="p-4">
+                <h3>Trending videos by Channel</h3>
+                <p></p>
+            </div>
+        </div>
+        <div id="references">
+            <div class="p-4">
+                <h3>References</h3>
+                <p></p>
+            </div>
+            <!-- <div class="mt-auto">
+                <p>Project by: <a href="https://github.com/ashwin-agarwal/" target="_blank">Ashwin Agarwal</a> for FIT5147 Data exploration and visualization - S1 2021</p>
+            </div> -->
+        </div>
+
+    </main>
+
+
+
+</body>
+
+</html>
