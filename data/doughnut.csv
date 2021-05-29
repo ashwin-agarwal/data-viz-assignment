@@ -1,0 +1,121 @@
+country_name,category_title,value
+Brazil,Others,29.5
+Brazil,Music,25.8
+Brazil,Entertainment,25.5
+Brazil,Gaming,7.1
+Brazil,Comedy,4.8
+Brazil,Education,2.2
+Brazil,News & Politics,2.1
+Brazil,Film & Animation,1.1
+Brazil,Autos & Vehicles,1.0
+Brazil,Howto & Style,0.9
+Canada,Others,31.6
+Canada,Entertainment,26.7
+Canada,Music,12.7
+Canada,Comedy,8.0
+Canada,Gaming,7.8
+Canada,Howto & Style,4.8
+Canada,Film & Animation,4.1
+Canada,Education,2.5
+Canada,Autos & Vehicles,1.6
+Canada,Movies,0.0
+France,Others,30.5
+France,Entertainment,23.9
+France,Music,17.4
+France,Comedy,10.6
+France,Howto & Style,4.7
+France,Gaming,4.4
+France,Film & Animation,3.9
+France,Education,2.3
+France,Autos & Vehicles,2.2
+France,Movies,0.0
+Germany,Others,32.1
+Germany,Entertainment,31.9
+Germany,Music,13.5
+Germany,Gaming,4.8
+Germany,Comedy,4.4
+Germany,Howto & Style,4.4
+Germany,Film & Animation,3.6
+Germany,Autos & Vehicles,3.5
+Germany,Education,1.9
+Germany,Movies,0.0
+India,Entertainment,42.2
+India,Others,24.2
+India,Music,14.5
+India,Comedy,8.7
+India,Howto & Style,3.3
+India,Film & Animation,3.1
+India,Education,2.6
+India,Gaming,1.0
+India,Autos & Vehicles,0.4
+India,Movies,0.0
+Japan,Entertainment,34.4
+Japan,Others,27.3
+Japan,Music,10.8
+Japan,Film & Animation,5.9
+Japan,Gaming,5.5
+Japan,Comedy,5.0
+Japan,Howto & Style,4.9
+Japan,News & Politics,3.1
+Japan,Autos & Vehicles,2.2
+Japan,Education,0.8
+Mexico,Others,28.2
+Mexico,Entertainment,27.6
+Mexico,Music,18.2
+Mexico,Gaming,6.7
+Mexico,News & Politics,5.4
+Mexico,Howto & Style,4.9
+Mexico,Comedy,4.3
+Mexico,Film & Animation,2.6
+Mexico,Education,1.1
+Mexico,Autos & Vehicles,1.0
+Overall,Others,32.4
+Overall,Entertainment,27.5
+Overall,Music,15.4
+Overall,Comedy,6.6
+Overall,Gaming,5.4
+Overall,Film & Animation,4.4
+Overall,Howto & Style,4.3
+Overall,Autos & Vehicles,2.0
+Overall,Education,2.0
+Overall,Movies,0.0
+Russia,Others,46.5
+Russia,Entertainment,16.3
+Russia,Film & Animation,8.3
+Russia,Comedy,7.4
+Russia,Music,7.3
+Russia,Autos & Vehicles,5.6
+Russia,Howto & Style,4.3
+Russia,Gaming,2.9
+Russia,Education,1.4
+Russia,Movies,0.0
+South Korea,Entertainment,31.0
+South Korea,Others,26.4
+South Korea,News & Politics,13.0
+South Korea,Music,8.7
+South Korea,Comedy,6.1
+South Korea,Film & Animation,5.0
+South Korea,Gaming,3.6
+South Korea,Howto & Style,2.8
+South Korea,Education,2.2
+South Korea,Autos & Vehicles,1.1
+UK,Others,24.5
+UK,Music,23.9
+UK,Entertainment,23.8
+UK,Gaming,8.2
+UK,Comedy,5.1
+UK,Film & Animation,4.4
+UK,Howto & Style,3.9
+UK,News & Politics,3.1
+UK,Education,1.6
+UK,Autos & Vehicles,1.4
+USA,Others,23.9
+USA,Entertainment,21.9
+USA,Music,18.5
+USA,Gaming,7.3
+USA,Comedy,7.0
+USA,Howto & Style,7.0
+USA,News & Politics,5.0
+USA,Film & Animation,4.8
+USA,Education,3.0
+USA,Autos & Vehicles,1.5
