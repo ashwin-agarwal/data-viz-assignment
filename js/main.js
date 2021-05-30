@@ -1,9 +1,18 @@
-$(document).ready(function() {
-    const GEOJSON_DATA_PATH = './data/filtered_countries.geojson',
-        BUBBLE_MAP_DATA_PATH = './data/bubble_map_data.csv',
-        DOUGHTNUT_DATA_PATH = "./data/doughnut.csv";
-    // DOUGHTNUT2_DATA_PATH = "./data/doughnut_2.csv";
+"use strict";
 
+const GEOJSON_DATA_PATH = './data/filtered_countries.geojson',
+    BUBBLE_MAP_DATA_PATH = './data/bubble_map_data.csv',
+    DOUGHTNUT_DATA_PATH = "./data/doughnut.csv",
+    WORDCLOUD_DATA_PATH = "./data/wordcloud.csv",
+    ENGAGEMENT_DATA_PATH = "./data/engagement_data.csv";
+
+const BUBBLE_PLOT = "#bubble_plot",
+    BUBBLE_MAP = "#bubble_map",
+    WORDCLOUD = "#wordcloud",
+    DOUGHNUT = "#doughnut";
+
+
+$(document).ready(function() {
     var observer = new IntersectionObserver(function(entries) {
         if (entries[0].isIntersecting === true) {
             let target_id = entries[0].target.id;
@@ -20,14 +29,40 @@ $(document).ready(function() {
     $("a.nav-link[href='" + window.location.hash + "']").addClass('active');
 
 
-    let data_ready = function(_, geo_data, bubble_map_data, doughnut_data) {
+    //taken from https://www.geeksforgeeks.org/how-to-convert-long-number-into-abbreviated-string-in-javascript/
+    let convrt = function(val) {
+        // thousands, millions, billions etc..
+        var s = ["", "k", "m", "b", "t"];
+
+        // dividing the value by 3.
+        var sNum = Math.floor(("" + val).length / 3);
+
+        // calculating the precised value.
+        var sVal = parseFloat((
+            sNum != 0 ? (val / Math.pow(1000, sNum)) : val).toPrecision(2));
+
+        if (sVal % 1 != 0) {
+            sVal = sVal.toFixed(1);
+        }
+
+        // appending the letter to precised val.
+        return sVal + s[sNum];
+    }
+
+    let data_ready = function(_, geo_data, bubble_map_data, doughnut_data, wordcloud_data, engagement_data) {
         delete(bubble_map_data['columns']);
-        createBubbleMap(geo_data, bubble_map_data);
+        let country_colors = createBubbleMap(geo_data, bubble_map_data);
 
         delete(doughnut_data['columns']);
         createDoughnut(doughnut_data);
 
-        console.log(bubble_map_data);
+        delete(wordcloud_data['columns']);
+        createWordCloud(wordcloud_data);
+
+        delete(engagement_data['columns']);
+
+        createBubblePlot(engagement_data, country_colors);
+
         $('#bubble_map path, #bubble_map circle').each(function(_, d) {
             $(this).click(function() {
                 let path_id = $(this).attr('id').replace('circle', 'map'),
@@ -36,9 +71,12 @@ $(document).ready(function() {
                 if ($('#' + path_id).hasClass('highlight')) {
                     $('#bubble_map path').removeClass("faded").removeClass("highlight");
                     $('#bubble_map circle').removeClass("faded").removeClass("highlight");
+
                     createDoughnut(doughnut_data, "Overall");
+                    createWordCloud(wordcloud_data);
                 } else {
                     createDoughnut(doughnut_data, $(d).attr("text"));
+                    createWordCloud(wordcloud_data, $(d).attr("text"));
 
                     $('#bubble_map path').removeClass("faded").removeClass("highlight");
                     $('#bubble_map circle').removeClass("faded").removeClass("highlight");
@@ -58,16 +96,152 @@ $(document).ready(function() {
         .defer(d3.json, GEOJSON_DATA_PATH)
         .defer(d3.csv, BUBBLE_MAP_DATA_PATH)
         .defer(d3.csv, DOUGHTNUT_DATA_PATH)
-        // .defer(d3.csv, DOUGHTNUT2_DATA_PATH)
+        .defer(d3.csv, WORDCLOUD_DATA_PATH)
+        .defer(d3.csv, ENGAGEMENT_DATA_PATH)
         .await(data_ready);
 
 
-    let createBubbleMap = function(dataGeo, counts_by_region) {
-        // The svg
-        var svg = d3.select("#bubble_map"),
-            width = $("#bubble_map").parent().width(),
-            height = $("#bubble_map").parent().height();
+    let showPlot = function(id, effect = "fade") {
+        $('svg' + id).prev().fadeOut('slow', function() {
+            this.remove();
+            if (effect == "fade") {
+                $('svg' + id).fadeIn('slow');
+            } else if (effect == "slide") {
+                $('svg' + id).show('slide');
+            }
+        });
+    }
 
+    /* WORKING HERE */
+    let createBubblePlot = function(data, country_colors, plot_id = BUBBLE_PLOT) {
+
+        let margin = { top: 100, right: 20, bottom: 30, left: 100 };
+
+        data = d3.nest()
+            .key(d => d.country_name)
+            .rollup(function(v) {
+                return {
+                    comments: d3.sum(v, d => d.comments),
+                    likes: d3.sum(v, d => d.likes),
+                    views: d3.sum(v, d => d.views)
+                };
+            })
+            .entries(data);
+
+        var svg = d3.select(plot_id).append("g"),
+            width = ($(plot_id).parent().width() - margin.left - margin.right),
+            height = ($(plot_id).parent().height() - margin.top - margin.bottom) * 0.6;
+
+        svg.attr("width", $(plot_id).parent().width()).attr("height", $(plot_id).parent().height() * 0.6).attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+        // Add X axis
+        var x = d3.scaleLinear()
+            .domain([1e9, d3.max(data, function(d) {
+                return d.value.likes + 1e9;
+            })])
+            .range([0, width]);
+
+        // X axis labels
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .attr("color", "#fff")
+            .call(d3.axisBottom(x).ticks(5));
+
+
+        // Add X axis name
+        // svg.append("text")
+        //     .attr("text-anchor", "end")
+        //     .attr("x", width + margin.left)
+        //     .attr("y", height + 50 + margin.top)
+        //     // .attr('fill', '#fff')
+        //     .text("Likes");
+
+        // Add Y axis
+        var y = d3.scaleLinear()
+            .domain([1e8, d3.max(data, function(d) {
+                return d.value.comments + 1e8;
+            })])
+            .range([height, 0]);
+
+        svg.append("g")
+            .call(d3.axisLeft(y).ticks(5));
+
+        // Add Y axis label:
+        // svg.append("text")
+        //     .attr("text-anchor", "end")
+        //     .attr("x", 20)
+        //     .attr("y", 50)
+        //     .text("Comments")
+        //     .attr("text-anchor", "start");
+        // .attr("fill", "#fff");
+
+
+        // Add a scale for bubble size
+        var z = d3.scaleSqrt()
+            .domain([200000, d3.max(data, function(d) {
+                return d.value.views;
+            })])
+            .range([2, 50]);
+
+        // -1- Create a tooltip div that is hidden by default:
+        var tooltip = d3.select(plot_id)
+            .append("div")
+            .style("opacity", 0)
+            .attr("class", "tooltip")
+            .style("background-color", "black")
+            .style("border-radius", "5px")
+            .style("padding", "10px")
+            .style("color", "white")
+
+        // -2- Create 3 functions to show / update (when mouse move but stay on same circle) / hide the tooltip
+        var showTooltip = function(d) {
+            tooltip
+                .transition()
+                .duration(200)
+            tooltip
+                .style("opacity", 1)
+                .html("Country: " + d.key + "<br/>Likes:" + d.value.likes + "<br/>Comments:" + d.value.comments + "<br/>Views:" + d.value.views)
+                .style("left", (d3.mouse(this)[0] + 30) + "px")
+                .style("top", (d3.mouse(this)[1] + 30) + "px")
+        }
+        var moveTooltip = function(d) {
+            tooltip
+                .style("left", (d3.mouse(this)[0] + 30) + "px")
+                .style("top", (d3.mouse(this)[1] + 30) + "px")
+        }
+        var hideTooltip = function(d) {
+            tooltip
+                .transition()
+                .duration(200)
+                .style("opacity", 0)
+        }
+
+        svg.append('g')
+            .selectAll("dot")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("class", function(d) { return "bubbles " + d.key })
+            .attr("cx", function(d) { return x(d.value.likes); })
+            .attr("cy", function(d) { return y(d.value.comments); })
+            .attr("r", function(d) { return z(d.value.views); })
+            .attr("title", function(d) { return d.value.likes + " " + d.value.comments })
+            .style("fill", function(d) { return country_colors[d.key]; })
+            // -3- Trigger the functions
+            .on("mouseover", showTooltip)
+            .on("mousemove", moveTooltip)
+            .on("mouseleave", hideTooltip);
+
+        showPlot(plot_id);
+    }
+
+
+    let createBubbleMap = function(dataGeo, counts_by_region, plot_id = BUBBLE_MAP) {
+        // The svg
+        var svg = d3.select(plot_id),
+            width = $(plot_id).parent().width(),
+            height = $(plot_id).parent().height();
 
         // Map and projection
         var projection = d3.geoMercator()
@@ -94,8 +268,8 @@ $(document).ready(function() {
 
             $('#by-region div.tooltip').html("Country: " + $(this).attr('title'))
                 .css({
-                    "left": d3.mouse(this)[0] + $('#bubble_map').offset().left + 10,
-                    "top": d3.mouse(this)[1] + $('#bubble_map').offset().top + 10,
+                    "left": d3.mouse(this)[0] + $(plot_id).offset().left + 10,
+                    "top": d3.mouse(this)[1] + $(plot_id).offset().top + 10,
                     "opacity": 1,
                     "display": "block"
                 });
@@ -107,8 +281,8 @@ $(document).ready(function() {
             $('#by-region div.tooltip').css({ "opacity": 0, "display": "none" });
         }
 
-        let color_pallete_no = {};
         // Draw the map
+        let color_pallete_no = {};
         let i = -1;
 
         svg.append("g")
@@ -119,7 +293,7 @@ $(document).ready(function() {
             // .attr("fill", "#fff")
             .attr("fill", function(d) {
                 i += 1;
-                color_pallete_no[d.properties.name] = i;
+                color_pallete_no[d.properties.name] = color(i);
                 return color(i);
             })
             .attr("d", d3.geoPath()
@@ -152,7 +326,7 @@ $(document).ready(function() {
                 return size(+d.value);
             })
             .style("fill", function(d) {
-                return color(color_pallete_no[d.country_name]);
+                return color_pallete_no[d.country_name];
             })
             .attr("title", d => d.country_name + "<br/>Total videos: " + d.value.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"))
             .attr("text", d => d.country_name)
@@ -160,13 +334,66 @@ $(document).ready(function() {
             .on('mouseover', bubbleMapMouseOver)
             .on('mouseout', bubbleMapMouseOut);
 
-        $('svg#bubble_map').prev().fadeOut('slow', function() {
-            this.remove();
-            $('svg#bubble_map').fadeIn('slow');
-        });
+        showPlot(plot_id);
+
+        return color_pallete_no;
     }
 
-    let createDoughnut = function(data, filter = 'Overall') {
+    let createWordCloud = function(data, filter = 'Overall', plot_id = WORDCLOUD) {
+        let filtered_data = [];
+        // let filtered_data = {};
+        $(data).each(function(_, d) {
+            if (d.country_name == filter) {
+                filtered_data.push({ "text": d.words, "size": d.count });
+                // filtered_data[d.words] = d.count;
+            }
+        });
+        data = filtered_data;
+
+        $(plot_id).empty();
+
+        var svg = d3.select(plot_id).append("g"),
+            width = $(plot_id).parent().width(),
+            height = $(plot_id).parent().height() - 100;
+
+
+        var color = d3.scaleOrdinal(d3.schemeTableau10);
+
+        var xScale = d3.scaleLinear()
+            .domain([0, d3.max(data, function(d) {
+                return d.size;
+            })])
+            .range([0, 18]);
+
+        d3.layout.cloud().size([width, height])
+            .timeInterval(20)
+            .words(data)
+            .fontSize(function(d) { return xScale(+d.size); })
+            .text(function(d) { return d.text; })
+            .rotate(function() { return ~~(Math.random() * 2) * 90; })
+            .font("Impact")
+            .on("end", function() {
+                svg.attr("transform", "translate(" + [width >> 1, height >> 1] + ")")
+                    .selectAll("text")
+                    .data(data)
+                    .enter().append("text")
+                    .style("font-size", function(d) { return d.size + "px"; })
+                    .style("font-family", "Impact")
+                    .style("fill", function(d, i) { return color(i); })
+                    .attr("text-anchor", "middle")
+                    .attr("transform", function(d) {
+                        return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
+                    })
+                    .text(function(d) { return d.text; });
+            })
+            .start();
+
+        d3.layout.cloud().stop();
+
+        showPlot(plot_id);
+    }
+
+    let createDoughnut = function(data, filter = 'Overall', plot_id = DOUGHNUT) {
         let filtered_data = {},
             others_data;
         $(data).each(function(_, d) {
@@ -179,13 +406,14 @@ $(document).ready(function() {
         filtered_data['Others'] = others_data;
         data = filtered_data;
 
-        $("#doughnut").empty();
-        var svg = d3.select("#doughnut").append("g"),
-            width = $("#doughnut").parent().width(),
-            height = $("#doughnut").parent().height(),
-            radius = (Math.min(width, height) / 2) * 0.6;
+        $(plot_id).empty();
+        var svg = d3.select(plot_id).append("g"),
+            width = $(plot_id).parent().width(),
+            height = $(plot_id).parent().height(),
+            radius = (Math.min(width, height) / 2) * 0.65;
 
-        var color = d3.scaleOrdinal(d3.schemeCategory10);
+        // var color = d3.scaleOrdinal(d3.schemeCategory10);
+        var color = d3.scaleOrdinal(d3.schemePaired);
 
         svg.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
@@ -257,9 +485,6 @@ $(document).ready(function() {
             .attr('y', 20)
             .text('Overall');
 
-        $('svg#doughnut').prev().fadeOut('show', function() {
-            this.remove();
-            $('svg#doughnut').show('slide');
-        });
+        showPlot(plot_id, "slide");
     }
 });
