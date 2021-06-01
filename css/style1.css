@@ -66,6 +66,10 @@ header {
     border-bottom: 1px solid black;
 }
 
+header h3 {
+    color: black;
+}
+
 .nav-masthead .nav-link {
     padding: .25rem 0;
     font-weight: 700;
@@ -122,6 +126,17 @@ a:hover {
     color: #FF0000;
 }
 
+.faded {
+    /*  Class that contains property of a faded element. */
+    /* stroke-opacity: 0.2; */
+    opacity: 0.1 !important;
+    /* fill-opacity: 0.4; */
+}
+
+.highlight {
+    opacity: 1 !important;
+}
+
 #bubble_map,
 #doughnut,
 #wordcloud,
@@ -129,27 +144,41 @@ a:hover {
     display: none;
 }
 
-path {
+#by-region path {
     opacity: 0.7;
 }
 
-path:hover,
-path.hovered {
+#stacked_barchart rect,
+#by-engagement circle {
+    opacity: 0.7;
+    stroke: white;
+}
+
+#by-region path:hover,
+#by-region path.hovered,
+#stacked_barchart rect:hover,
+#by-engagement circle:hover,
+#by-engagement circle.hovered {
     stroke: black;
     opacity: 1;
     cursor: pointer;
 }
 
-circle {
+#bubble_map circle {
     opacity: 1;
     stroke: white;
 }
 
-circle:hover,
-circle.hovered {
+#bubble_map circle:hover,
+#bubble_map circle.hovered {
     opacity: 0.7;
     stroke: black;
     cursor: pointer;
+}
+
+#bubble_map text.hovered,
+#bubble_map text:hover {
+    text-decoration: underline;
 }
 
 .tooltip {
@@ -177,17 +206,6 @@ polyline {
     stroke-width: 1;
 }
 
-.faded {
-    /*  Class that contains property of a faded element. */
-    /* stroke-opacity: 0.2; */
-    opacity: 0.1;
-    /* fill-opacity: 0.4; */
-}
-
-.highlight {
-    opacity: 1;
-}
-
 text.doughnut_center {
     font-size: 1.3em;
     fill: #fff;
@@ -195,26 +213,29 @@ text.doughnut_center {
 }
 
 #wordcloud text {
-    opacity: 0.9;
+    opacity: 0.8;
 }
 
-#wordcloud text:hover {
+#wordcloud text:hover,
+#wordcloud text.hovered,
+#bubble_plot text:hover.legend,
+#bubble_plot text.hovered {
     opacity: 1;
     text-decoration: underline;
     cursor: default;
 }
 
-header h3 {
-    color: black;
-}
-
-#bubble_plot line,
-#bubble_plot path {
-    stroke: #fff;
+#by-engagement line,
+#by-engagement path {
+    stroke: rgb(180, 180, 180);
     stroke-width: 3px;
 }
 
-#bubble_plot text {
-    fill: #fff;
-    font-size: 12px;
+#by-engagement text {
+    fill: rgb(180, 180, 180);
+    font-size: 16px;
+}
+
+#bubble_plot text.legend {
+    font-size: 1rem;
 }

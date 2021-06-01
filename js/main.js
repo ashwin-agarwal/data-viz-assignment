@@ -4,12 +4,14 @@ const GEOJSON_DATA_PATH = './data/filtered_countries.geojson',
     BUBBLE_MAP_DATA_PATH = './data/bubble_map_data.csv',
     DOUGHTNUT_DATA_PATH = "./data/doughnut.csv",
     WORDCLOUD_DATA_PATH = "./data/wordcloud.csv",
-    ENGAGEMENT_DATA_PATH = "./data/engagement_data.csv";
+    BUBBLE_PLOT_DATA_PATH = "./data/bubble_plot_data.csv",
+    STACKED_BAR_PLOT_PATH = "./data/stacked_barplot.csv";
 
 const BUBBLE_PLOT = "#bubble_plot",
     BUBBLE_MAP = "#bubble_map",
     WORDCLOUD = "#wordcloud",
-    DOUGHNUT = "#doughnut";
+    DOUGHNUT = "#doughnut",
+    STACKED_BARCHART = "#stacked_barchart";
 
 
 $(document).ready(function() {
@@ -29,27 +31,7 @@ $(document).ready(function() {
     $("a.nav-link[href='" + window.location.hash + "']").addClass('active');
 
 
-    //taken from https://www.geeksforgeeks.org/how-to-convert-long-number-into-abbreviated-string-in-javascript/
-    let convrt = function(val) {
-        // thousands, millions, billions etc..
-        var s = ["", "k", "m", "b", "t"];
-
-        // dividing the value by 3.
-        var sNum = Math.floor(("" + val).length / 3);
-
-        // calculating the precised value.
-        var sVal = parseFloat((
-            sNum != 0 ? (val / Math.pow(1000, sNum)) : val).toPrecision(2));
-
-        if (sVal % 1 != 0) {
-            sVal = sVal.toFixed(1);
-        }
-
-        // appending the letter to precised val.
-        return sVal + s[sNum];
-    }
-
-    let data_ready = function(_, geo_data, bubble_map_data, doughnut_data, wordcloud_data, engagement_data) {
+    let data_ready = function(_, geo_data, bubble_map_data, doughnut_data, wordcloud_data, bubble_plot_data, stacked_bar_plot_data) {
         delete(bubble_map_data['columns']);
         let country_colors = createBubbleMap(geo_data, bubble_map_data);
 
@@ -59,14 +41,15 @@ $(document).ready(function() {
         delete(wordcloud_data['columns']);
         createWordCloud(wordcloud_data);
 
-        delete(engagement_data['columns']);
+        delete(bubble_plot_data['columns']);
+        createBubblePlot(bubble_plot_data, country_colors);
 
-        createBubblePlot(engagement_data, country_colors);
+        delete(stacked_bar_plot_data['columns']);
+        createStackedBarchart(stacked_bar_plot_data, "Overall");
 
-        $('#bubble_map path, #bubble_map circle').each(function(_, d) {
+        $('#bubble_map path, #bubble_map circle[id^=circle-]').each(function(_, d) {
             $(this).click(function() {
-                let path_id = $(this).attr('id').replace('circle', 'map'),
-                    circle_id = $(this).attr('id').replace('map', 'circle');
+                let path_id = $(this).attr('id').replace('circle', 'map');
 
                 if ($('#' + path_id).hasClass('highlight')) {
                     $('#bubble_map path').removeClass("faded").removeClass("highlight");
@@ -75,17 +58,36 @@ $(document).ready(function() {
                     createDoughnut(doughnut_data, "Overall");
                     createWordCloud(wordcloud_data);
                 } else {
-                    createDoughnut(doughnut_data, $(d).attr("text"));
-                    createWordCloud(wordcloud_data, $(d).attr("text"));
-
                     $('#bubble_map path').removeClass("faded").removeClass("highlight");
                     $('#bubble_map circle').removeClass("faded").removeClass("highlight");
 
+                    createDoughnut(doughnut_data, $(d).attr("text"));
+                    createWordCloud(wordcloud_data, $(d).attr("text"));
+
+
                     $('#bubble_map path[text!="' + $(d).attr("text") + '"]').addClass("faded");
-                    $('#bubble_map circle[text!="' + $(d).attr("text") + '"]').addClass("faded");
+                    $('#bubble_map circle[id^=circle-]').addClass("faded");
+
+                    $('#bubble_map circle[text="' + $(d).attr("text") + '"]').removeClass("faded");
 
                     $('text.doughnut_center').html($(d).attr("text"));
                     $('#' + path_id).addClass("highlight");
+                }
+            });
+        });
+
+        $('#bubble_plot circle.bubble, #bubble_plot circle.legend').each(function() {
+            $(this).click(function() {
+                let circle_text = $(this).attr("text");
+
+                if ($("#bubble_plot circle.bubble[text='" + circle_text + "']").hasClass("highlight")) {
+                    $('#bubble_plot circle.bubble').removeClass("faded").removeClass("highlight");
+                    createStackedBarchart(stacked_bar_plot_data, "Overall");
+                } else {
+                    $('#bubble_plot circle.bubble').removeClass("faded").removeClass("highlight");
+                    $('#bubble_plot circle.bubble[text="' + $(this).attr('text') + '"]').addClass("highlight");
+                    $('#bubble_plot circle.bubble:not(.highlight)').addClass("faded");
+                    createStackedBarchart(stacked_bar_plot_data, $(this).attr("text"));
                 }
             });
         });
@@ -97,7 +99,8 @@ $(document).ready(function() {
         .defer(d3.csv, BUBBLE_MAP_DATA_PATH)
         .defer(d3.csv, DOUGHTNUT_DATA_PATH)
         .defer(d3.csv, WORDCLOUD_DATA_PATH)
-        .defer(d3.csv, ENGAGEMENT_DATA_PATH)
+        .defer(d3.csv, BUBBLE_PLOT_DATA_PATH)
+        .defer(d3.csv, STACKED_BAR_PLOT_PATH)
         .await(data_ready);
 
 
@@ -112,21 +115,137 @@ $(document).ready(function() {
         });
     }
 
-    /* WORKING HERE */
+    let createStackedBarchart = function(data, filter = "Overall", plot_id = STACKED_BARCHART) {
+
+        let margin = { top: 100, right: 60, bottom: 30, left: 210 };
+
+        data = data.filter(d => d.country_name == filter);
+
+        $(plot_id).empty();
+
+        var width = ($(plot_id).parent().width() - margin.left - margin.right),
+            height = ($(plot_id).parent().height() - margin.top - margin.bottom) * 0.6,
+            svg = d3.select(plot_id)
+            .append("g")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .attr("transform",
+                "translate(" + margin.left + "," + margin.top + ")");
+
+        var subgroups = ["likes", "comments", "dislikes"];
+
+        var groups = d3.map(data, function(d) { return (d.category_title) }).keys();
+
+        // Add X axis
+        var x = d3.scaleLinear()
+            .domain([0, 100])
+            .range([0, width]);
+
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+
+        // Add X axis
+        var y = d3.scaleBand()
+            .domain(groups)
+            .range([0, height])
+            .padding([0.2]);
+
+        svg.append("g")
+            .call(d3.axisLeft(y).tickSizeOuter(0));
+
+
+        // color palette = one color per subgroup
+        var color = d3.scaleOrdinal()
+            .domain(subgroups)
+            .range(['#7fff00', '#15f4ee', '#ff0000']);
+
+
+        //stack the data? --> stack per subgroup
+        var stackedData = d3.stack()
+            .keys(subgroups)
+            (data);
+
+
+        // Show the bars
+        svg.append("g")
+            .selectAll("g")
+            // Enter in the stack data = loop key per key = group per group
+            .data(stackedData)
+            .enter().append("g")
+            .attr("fill", function(d) { return color(d.key); })
+            .selectAll("rect")
+            // enter a second time = loop subgroup per subgroup to add all rectangles
+            .data(function(d) { return d; })
+            .enter().append("rect")
+            .attr("x", function(d) { return x(d[0]); })
+            .attr("y", function(d) { return y(d.data.category_title); })
+            .attr("width", function(d) { return x(d[1]) - x(d[0]); })
+            .attr("height", y.bandwidth())
+
+
+        //subgroups legend
+        var yLegend = height + 70;
+        svg.selectAll(plot_id)
+            .data(subgroups)
+            .enter()
+            .append("circle")
+            .attr("cy", yLegend)
+            .attr("cx", function(d, i) { return (i * 150); })
+            .attr("r", 7)
+            .style("fill", (_, i) => color(i));
+
+        svg.selectAll(plot_id)
+            .data(subgroups)
+            .enter()
+            .append("text")
+            .attr("y", yLegend)
+            .attr("x", function(d, i) { return 14 + (i * 150); })
+            .text(function(d) { return d.charAt().toUpperCase() + d.slice(1) })
+            .style("fill", (_, i) => color(i))
+            .attr("text-anchor", "center")
+            .style("alignment-baseline", "middle");
+
+        // Add X axis name
+        svg.append("text")
+            .attr("text-anchor", "end")
+            .attr("x", width)
+            .attr("y", height + 45)
+            .style("font-size", "18px")
+            .style("fill", "rgb(180, 180, 180)")
+            .text("Engagement %");
+
+        // Add country name to the chart
+        svg.append("text")
+            .attr("text-anchor", "end")
+            .attr("x", width)
+            .attr("y", 0)
+            .style("font-size", "18px")
+            .style("fill", "#fff")
+            .text(filter);
+
+        showPlot(plot_id);
+
+    }
+
     let createBubblePlot = function(data, country_colors, plot_id = BUBBLE_PLOT) {
 
         let margin = { top: 100, right: 20, bottom: 30, left: 100 };
+        let filtered_data = [];
 
-        data = d3.nest()
-            .key(d => d.country_name)
-            .rollup(function(v) {
-                return {
-                    comments: d3.sum(v, d => d.comments),
-                    likes: d3.sum(v, d => d.likes),
-                    views: d3.sum(v, d => d.views)
-                };
-            })
-            .entries(data);
+        data = $(data).each(function(_, d) {
+            filtered_data.push({
+                key: d.country_name,
+                value: {
+                    comments: d.comments / 1e9,
+                    likes: d.likes / 1e9,
+                    dislikes: d.dislikes / 1e9,
+                    views: d.views / 1e9
+                }
+            });
+        });
+
+        data = filtered_data;
 
         var svg = d3.select(plot_id).append("g"),
             width = ($(plot_id).parent().width() - margin.left - margin.right),
@@ -137,30 +256,30 @@ $(document).ready(function() {
 
         // Add X axis
         var x = d3.scaleLinear()
-            .domain([1e9, d3.max(data, function(d) {
-                return d.value.likes + 1e9;
+            .domain([1, d3.max(data, function(d) {
+                return d.value.likes + 1;
             })])
             .range([0, width]);
 
         // X axis labels
         svg.append("g")
             .attr("transform", "translate(0," + height + ")")
-            .attr("color", "#fff")
             .call(d3.axisBottom(x).ticks(5));
 
 
         // Add X axis name
-        // svg.append("text")
-        //     .attr("text-anchor", "end")
-        //     .attr("x", width + margin.left)
-        //     .attr("y", height + 50 + margin.top)
-        //     // .attr('fill', '#fff')
-        //     .text("Likes");
+        svg.append("text")
+            .attr("text-anchor", "end")
+            .attr("x", width)
+            .attr("y", height + 45)
+            .style("font-size", "18px")
+            .style("fill", "rgb(180, 180, 180)")
+            .text("Likes (billions)");
 
         // Add Y axis
         var y = d3.scaleLinear()
-            .domain([1e8, d3.max(data, function(d) {
-                return d.value.comments + 1e8;
+            .domain([0.1, d3.max(data, function(d) {
+                return d.value.comments + 0.1;
             })])
             .range([height, 0]);
 
@@ -168,74 +287,137 @@ $(document).ready(function() {
             .call(d3.axisLeft(y).ticks(5));
 
         // Add Y axis label:
-        // svg.append("text")
-        //     .attr("text-anchor", "end")
-        //     .attr("x", 20)
-        //     .attr("y", 50)
-        //     .text("Comments")
-        //     .attr("text-anchor", "start");
-        // .attr("fill", "#fff");
+        svg.append("text")
+            .attr("x", 10)
+            .attr("y", 0)
+            .html("Comments (billions)")
+            .style("font-size", "18px")
+            .attr("text-anchor", "start");
 
 
         // Add a scale for bubble size
         var z = d3.scaleSqrt()
-            .domain([200000, d3.max(data, function(d) {
+            .domain([1, d3.max(data, function(d) {
                 return d.value.views;
             })])
             .range([2, 50]);
 
-        // -1- Create a tooltip div that is hidden by default:
-        var tooltip = d3.select(plot_id)
-            .append("div")
-            .style("opacity", 0)
-            .attr("class", "tooltip")
-            .style("background-color", "black")
-            .style("border-radius", "5px")
-            .style("padding", "10px")
-            .style("color", "white")
-
         // -2- Create 3 functions to show / update (when mouse move but stay on same circle) / hide the tooltip
-        var showTooltip = function(d) {
-            tooltip
-                .transition()
-                .duration(200)
-            tooltip
-                .style("opacity", 1)
-                .html("Country: " + d.key + "<br/>Likes:" + d.value.likes + "<br/>Comments:" + d.value.comments + "<br/>Views:" + d.value.views)
-                .style("left", (d3.mouse(this)[0] + 30) + "px")
-                .style("top", (d3.mouse(this)[1] + 30) + "px")
+        var bubblePlotMouseOver = function(d) {
+            $('#by-engagement div.tooltip')
+                .html("<strong>Country:</strong> " + d.key + "<br/><strong>Views:</strong> " + d.value.views.toFixed(2) + " billion<br/><strong>Likes:</strong> " + d.value.likes.toFixed(2) + " billion<br/><strong>Comments:</strong> " + d.value.comments.toFixed(2) + " billion<br/><strong>Dislikes:</strong> " + d.value.dislikes.toFixed(2) + " billion<br/>Click for category drill-down.")
+                .css({
+                    "left": d3.mouse(this)[0] + $(plot_id).offset().left + 120,
+                    "top": d3.mouse(this)[1] + $(plot_id).offset().top - 30,
+                    "opacity": 1,
+                    "display": "block"
+                });
+
+            $("#bubble_plot [text='" + $(this).attr("text") + "']").toggleClass("hovered");
         }
-        var moveTooltip = function(d) {
-            tooltip
-                .style("left", (d3.mouse(this)[0] + 30) + "px")
-                .style("top", (d3.mouse(this)[1] + 30) + "px")
-        }
-        var hideTooltip = function(d) {
-            tooltip
-                .transition()
-                .duration(200)
-                .style("opacity", 0)
+        var bubblePlotMouseOut = function(d) {
+            $('#by-engagement div.tooltip').css({ "opacity": 0, "display": "none" });
+            $("#bubble_plot [text='" + $(this).attr("text") + "']").toggleClass("hovered");
         }
 
-        svg.append('g')
+        svg.append("g")
             .selectAll("dot")
             .data(data)
             .enter()
             .append("circle")
-            .attr("class", function(d) { return "bubbles " + d.key })
+            .attr("class", "bubble")
             .attr("cx", function(d) { return x(d.value.likes); })
             .attr("cy", function(d) { return y(d.value.comments); })
             .attr("r", function(d) { return z(d.value.views); })
             .attr("title", function(d) { return d.value.likes + " " + d.value.comments })
+            .attr("text", function(d) { return d.key })
             .style("fill", function(d) { return country_colors[d.key]; })
             // -3- Trigger the functions
-            .on("mouseover", showTooltip)
-            .on("mousemove", moveTooltip)
-            .on("mouseleave", hideTooltip);
+            .on("mouseover", bubblePlotMouseOver)
+            .on("mouseout", bubblePlotMouseOut);
+
+
+        // Add legend: circles
+        var valuesToShow = [50, 150, 300],
+            xCircle = width - 70,
+            xLabel = xCircle + 60,
+            yHeight = height - 80;
+
+        svg
+            .selectAll("legend")
+            .data(valuesToShow)
+            .enter()
+            .append("circle")
+            .attr("cx", xCircle)
+            .attr("cy", function(d) { return yHeight - z(d) })
+            .attr("r", function(d) { return z(d) })
+            .attr("stroke", "rgb(180, 180, 180)")
+            .style("fill", "none");
+
+        svg
+            .selectAll("legend")
+            .data(valuesToShow)
+            .enter()
+            .append("line")
+            .attr('x1', function(d) { return xCircle + z(d) })
+            .attr('x2', xLabel)
+            .attr('y1', function(d) { return yHeight - z(d) })
+            .attr('y2', function(d) { return yHeight - z(d) })
+            .attr('stroke', "rgb(180, 180, 180)")
+            .style('stroke-dasharray', ('2,2'));
+
+        // Add legend: labels
+        svg
+            .selectAll("legend")
+            .data(valuesToShow)
+            .enter()
+            .append("text")
+            .attr('x', xLabel + 2)
+            .attr('y', function(d) { return yHeight - z(d) })
+            .text(function(d) { return d })
+            .style("font-size", 10)
+            .attr('alignment-baseline', 'middle');
+
+        // Legend title
+        svg.append("text")
+            .attr('x', xCircle)
+            .attr("y", yHeight + 30)
+            .style("fill", "rgb(180, 180, 180)")
+            .text("Views (billions)")
+            .attr("text-anchor", "middle")
+
+
+        //country legend
+        var yLegend = height + 70;
+        svg.selectAll(plot_id)
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("class", "legend")
+            .attr("text", d => d.key)
+            .attr("cy", function(d, i) { return yLegend + (Math.floor(i / 6) * 30); })
+            .attr("cx", function(d, i) { return ((i % 6) * (width / 6) * 1.05) % width })
+            .attr("r", 7)
+            .style("fill", function(d) { return country_colors[d.key]; })
+            .on("mouseover", bubblePlotMouseOver)
+            .on("mouseout", bubblePlotMouseOut);
+
+
+        svg.selectAll(plot_id)
+            .data(data)
+            .enter()
+            .append("text")
+            .attr("class", "legend")
+            .attr("y", function(d, i) { return yLegend + (Math.floor(i / 6) * 30); })
+            .attr("x", function(d, i) { return 14 + ((i % 6) * (width / 6) * 1.05) % width })
+            .style("fill", function(d) { return country_colors[d.key] })
+            .attr("text", d => d.key)
+            .text(function(d) { return d.key })
+            .attr("text-anchor", "left")
+            .style("alignment-baseline", "middle");
 
         showPlot(plot_id);
     }
-
 
     let createBubbleMap = function(dataGeo, counts_by_region, plot_id = BUBBLE_MAP) {
         // The svg
@@ -249,7 +431,7 @@ $(document).ready(function() {
             .scale(180) // This is like the zoom
             .translate([width / 2, height / 2]);
 
-        var color = d3.scaleOrdinal(d3.schemeSet3);
+        var color = d3.schemePaired;
         // var color = d3.scaleOrdinal(d3.schemePaired);
 
         // Add a scale for bubble size
@@ -266,7 +448,10 @@ $(document).ready(function() {
             $('#circle-' + $(this).attr('id').split('-')[1]).toggleClass('hovered');
             $('#map-' + $(this).attr('id').split('-')[1]).toggleClass('hovered');
 
-            $('#by-region div.tooltip').html("Country: " + $(this).attr('title'))
+            $(plot_id + " #legend_circle-" + $(this).attr('id').split('-')[1]).toggleClass('hovered');
+            $(plot_id + " #legend_text-" + $(this).attr('id').split('-')[1]).toggleClass('hovered');
+
+            $('#by-region div.tooltip').html("<strong>Country:</strong> " + $(this).attr('title'))
                 .css({
                     "left": d3.mouse(this)[0] + $(plot_id).offset().left + 10,
                     "top": d3.mouse(this)[1] + $(plot_id).offset().top + 10,
@@ -278,6 +463,8 @@ $(document).ready(function() {
         let bubbleMapMouseOut = function() {
             $('#map-' + $(this).attr('id').split('-')[1]).toggleClass('hovered');
             $('#circle-' + $(this).attr('id').split('-')[1]).toggleClass('hovered');
+            $(plot_id + " #legend_circle-" + $(this).attr('id').split('-')[1]).toggleClass('hovered');
+            $(plot_id + " #legend_text-" + $(this).attr('id').split('-')[1]).toggleClass('hovered');
             $('#by-region div.tooltip').css({ "opacity": 0, "display": "none" });
         }
 
@@ -293,8 +480,8 @@ $(document).ready(function() {
             // .attr("fill", "#fff")
             .attr("fill", function(d) {
                 i += 1;
-                color_pallete_no[d.properties.name] = color(i);
-                return color(i);
+                color_pallete_no[d.properties.name] = color[i];
+                return color[i];
             })
             .attr("d", d3.geoPath()
                 .projection(projection)
@@ -309,7 +496,7 @@ $(document).ready(function() {
 
         // Add circles:        
         svg
-            .selectAll("myCircles")
+            .selectAll("bubbles")
             .data(counts_by_region.sort(function(a, b) {
                 return +b.value - +a.value;
             }))
@@ -328,11 +515,93 @@ $(document).ready(function() {
             .style("fill", function(d) {
                 return color_pallete_no[d.country_name];
             })
-            .attr("title", d => d.country_name + "<br/>Total videos: " + d.value.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"))
+            .attr("title", d => d.country_name + "<br/><strong>Total videos:</strong> " + d.value.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"))
             .attr("text", d => d.country_name)
             .attr("data-value", d => d.value)
             .on('mouseover', bubbleMapMouseOver)
             .on('mouseout', bubbleMapMouseOut);
+
+        // Add legend: circles
+        var valuesToShow = [45000, 90000],
+            xCircle = 70,
+            xLabel = xCircle + 60,
+            yHeight = height - 150;
+
+        svg
+            .selectAll("legend")
+            .attr("class", "legend")
+            .data(valuesToShow)
+            .enter()
+            .append("circle")
+            .attr("cx", xCircle)
+            .attr("cy", function(d) { return yHeight - size(d) })
+            .attr("r", function(d) { return size(d) })
+            .style("fill", "none");
+
+        svg
+            .selectAll("legend")
+            .data(valuesToShow)
+            .enter()
+            .append("line")
+            .attr('x1', function(d) { return xCircle + size(d) })
+            .attr('x2', xLabel)
+            .attr('y1', function(d) { return yHeight - size(d) })
+            .attr('y2', function(d) { return yHeight - size(d) })
+            .attr('stroke', 'rgb(180, 180, 180)')
+            .style('stroke-dasharray', ('2,2'));
+
+        // Add legend: labels
+        svg
+            .selectAll("legend")
+            .data(valuesToShow)
+            .enter()
+            .append("text")
+            .attr('x', xLabel + 2)
+            .attr('y', function(d) { return yHeight - size(d) })
+            .text(function(d) { return d / 1000 + "K" })
+            .style("font-size", "9px")
+            .attr("fill", "rgb(180, 180, 180)")
+            .attr('alignment-baseline', 'middle');
+
+        // Legend title
+        svg.append("text")
+            .attr('x', xCircle)
+            .attr("y", yHeight + 18)
+            .attr("fill", "rgb(180, 180, 180)")
+            .style("font-size", "12px")
+            .text("Total Videos")
+            .attr("text-anchor", "middle")
+
+        //country legend
+        var yLegend = height - 180,
+            xLegend = width - 600;
+
+        svg.selectAll(plot_id)
+            .data(counts_by_region.sort(function(a, b) {
+                return d3.ascending(a.country_name, b.country_name);
+            }))
+            .enter()
+            .append("circle")
+            .attr("id", d => "legend_circle-" + d.country_name.replace(" ", "_").toLowerCase())
+            .attr("cy", function(d, i) { return yLegend + (25 * Math.floor(i / 6)); })
+            .attr("cx", function(d, i) { return xLegend + ((i % 6) * (width / 11)) % width })
+            .attr("r", 7)
+            .style("fill", function(d) { return color_pallete_no[d.country_name]; })
+            .attr("title", d => d.country_name + "<br/>Click map to drill-down")
+            .on("mouseover", bubbleMapMouseOver)
+            .on("mouseout", bubbleMapMouseOut);
+
+
+        svg.selectAll(plot_id)
+            .data(counts_by_region)
+            .enter()
+            .append("text")
+            .attr("id", d => "legend_text-" + d.country_name.replace(" ", "_").toLowerCase())
+            .attr("y", function(d, i) { return yLegend + (25 * Math.floor(i / 6)) + 2; })
+            .attr("x", function(d, i) { return xLegend + 14 + ((i % 6) * (width / 11)) % width })
+            .style("fill", function(d) { return color_pallete_no[d.country_name] })
+            .text(function(d) { return d.country_name })
+            .style("alignment-baseline", "middle");
 
         showPlot(plot_id);
 
@@ -413,7 +682,7 @@ $(document).ready(function() {
             radius = (Math.min(width, height) / 2) * 0.65;
 
         // var color = d3.scaleOrdinal(d3.schemeCategory10);
-        var color = d3.scaleOrdinal(d3.schemePaired);
+        var color = (d3.schemeCategory10 + ',' + d3.schemePaired).split(',');
 
         svg.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
@@ -440,7 +709,7 @@ $(document).ready(function() {
             .append('path')
             .attr('text', d => d.data.key)
             .attr('fill', function(d) {
-                return color(d.index);
+                return color[d.index];
             })
             .attr('d', arc);
 
@@ -476,13 +745,13 @@ $(document).ready(function() {
                 return (midangle < Math.PI ? 'start' : 'end')
             })
             .style('fill', function(d) {
-                return color(d.index);
+                return color[d.index];
             });
 
         svg
             .append("text")
             .attr("class", "doughnut_center")
-            .attr('y', 20)
+            .attr('y', 15)
             .text('Overall');
 
         showPlot(plot_id, "slide");
