@@ -21,6 +21,7 @@
 
     <script src="./js/bootstrap.min.js"></script>
     <script src="./js/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="./js/main.js"></script>
 
     <!-- Load d3.js and the geo projection plugin -->
@@ -34,6 +35,7 @@
     <link rel="stylesheet" href="./css/style1.css" />
     <link rel="stylesheet" href="./css/bootstrap.min.css" />
     <link rel="shortcut icon" href="./images/favicon.ico" />
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 </head>
 
 <body class="w-100">
@@ -102,13 +104,14 @@
         <div id="by-engagement">
             <div class="p-4 h-100">
                 <h3>How is the engagement of trending videos?</h3>
-                <p>The following visualizations shows the engagement rate of trending videos by region and category. Notice the correlation between likes, comments, and views.
+                <p>The following visualizations show the engagement rate of trending videos by region and category. Notice the correlation between likes, comments, and views.
                 </p>
                 <p>Click the bubble of any region to see the engagement distribution (likes, comments, dislikes) for that region by category. Click the bubble again to see the overall view.</p>
 
                 <div class="tooltip text-dark bg-white"></div>
-                <div class="row h-100">
-                    <div class="col h-100">
+
+                <div class="row h-100 mt-5">
+                    <div class="col h-100 mt-1">
                         <div class="h-100">
                             <div class="d-flex justify-content-center h-100 align-items-center">
                                 <div class="spinner-border" role="status">
@@ -117,7 +120,33 @@
                             <svg id="bubble_plot" width="100%" height="100%"></svg>
                         </div>
                     </div>
-                    <div class="h-100 col">
+
+                    <div class="h-100 col mt-1">
+                        <div class="text-center d-print-inline sort_radio">
+                            <div class="form-check-inline">
+                                <span>Sort by:</span>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="sort_radio" id="likes" value="likes" checked>
+                                <label class="form-check-label" for="likes">Likes</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="sort_radio" id="comments" value="comments">
+                                <label class="form-check-label" for="comments">Comments</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="sort_radio" id="dislikes" value="dislikes">
+                                <label class="form-check-label" for="dislikes">Dislikes</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="sort_radio" id="views" value="views">
+                                <label class="form-check-label" for="views">Views</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="sort_radio" id="engagement_rate" value="engagement_rate">
+                                <label class="form-check-label" for="engagement_rate">Engagement Rate</label>
+                            </div>
+                        </div>
                         <div class="h-100">
                             <div class="d-flex justify-content-center h-100 align-items-center">
                                 <div class="spinner-border" role="status">
@@ -125,13 +154,24 @@
                             </div>
                             <svg id="stacked_barchart" width="100%" height="100%"></svg>
                         </div>
+
                     </div>
+
+                    <!-- <div id="slider-container" class="container h-25">
+                        <div class="row justify-content-center p-5">
+                            <div id="slider-range" class="w-50"></div>
+                        </div>
+
+                    </div> -->
+
                 </div>
+
+
             </div>
         </div>
         <div id="by-channel">
             <div class="p-4">
-                <h3>Trending videos by Channel</h3>
+                <h3>Which channels have trending videos?</h3>
                 <p></p>
             </div>
         </div>

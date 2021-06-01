@@ -30,7 +30,6 @@ $(document).ready(function() {
 
     $("a.nav-link[href='" + window.location.hash + "']").addClass('active');
 
-
     let data_ready = function(_, geo_data, bubble_map_data, doughnut_data, wordcloud_data, bubble_plot_data, stacked_bar_plot_data) {
         delete(bubble_map_data['columns']);
         let country_colors = createBubbleMap(geo_data, bubble_map_data);
@@ -91,6 +90,17 @@ $(document).ready(function() {
                 }
             });
         });
+
+        $('input[name="sort_radio"]').click(function() {
+            let country_selected = "Overall";
+
+            if ($("#bubble_plot circle.bubble").hasClass("highlight")) {
+                country_selected = $("#bubble_plot circle.bubble.highlight").attr("text");
+            }
+            createStackedBarchart(stacked_bar_plot_data, country_selected);
+        });
+
+        // showSlider();
     }
 
 
@@ -106,7 +116,8 @@ $(document).ready(function() {
 
     let showPlot = function(id, effect = "fade") {
         $('svg' + id).prev().fadeOut('slow', function() {
-            this.remove();
+            $(this).parent().find('[role="status"]').parent().remove()
+                // this.remove();
             if (effect == "fade") {
                 $('svg' + id).fadeIn('slow');
             } else if (effect == "slide") {
@@ -115,9 +126,23 @@ $(document).ready(function() {
         });
     }
 
+    let formatN = function(n, decimal = 2) {
+        n = parseInt(n);
+        if (n > 1e9) {
+            return (n / 1e9).toFixed(decimal) + " B";
+        } else if (n > 1e6) {
+            return (n / 1e6).toFixed(decimal) + " M";
+        } else if (n > 1e3) {
+            return (n / 1e3).toFixed(decimal) + " K";
+        } else {
+            return n.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
+        }
+    }
+
     let createStackedBarchart = function(data, filter = "Overall", plot_id = STACKED_BARCHART) {
 
-        let margin = { top: 100, right: 60, bottom: 30, left: 210 };
+        let margin = { top: 36, right: 60, bottom: 30, left: 210 };
+        let sort_col = $('input[name="sort_radio"]:checked').val();
 
         data = data.filter(d => d.country_name == filter);
 
@@ -134,7 +159,13 @@ $(document).ready(function() {
 
         var subgroups = ["likes", "comments", "dislikes"];
 
-        var groups = d3.map(data, function(d) { return (d.category_title) }).keys();
+        data = data.sort(function(a, b) {
+            return +b[sort_col] - +a[sort_col];
+        });
+
+        var groups = d3.map(data, function(d) {
+            return (d.category_title);
+        }).keys();
 
         // Add X axis
         var x = d3.scaleLinear()
@@ -166,6 +197,35 @@ $(document).ready(function() {
             .keys(subgroups)
             (data);
 
+        var stackedBarChartMouseOver = function(d) {
+
+            $('#by-engagement div.tooltip')
+                .html(function() {
+                    return "<strong>" + d.data.category_title + "</strong><br/><strong>Views:</strong> " + formatN(d.data.views) + " <br/><strong>Engagement rate:</strong> " + d.data.engagement_rate + "%<br/><strong>Likes:</strong> " + d.data.likes + "%<br/><strong>Comments:</strong> " + d.data.comments + "%<br/><strong>Dislikes:</strong> " + d.data.dislikes + "%";
+                })
+                .css({
+                    "left": d3.mouse(this)[0] + $(plot_id).offset().left + 100,
+                    "top": d3.mouse(this)[1] + $(plot_id).offset().top - 140,
+                    "opacity": 1,
+                    "display": "block"
+                });
+
+            // $("#bubble_plot [text='" + $(this).attr("text") + "']").toggleClass("hovered");
+        }
+
+        var stackedBarChartMouseOut = function() {
+            // alert('b');
+            $('#by-engagement div.tooltip').css({ "opacity": 0, "display": "none" });
+            // $("#bubble_plot [text='" + $(this).attr("text") + "']").toggleClass("hovered");
+        };
+
+        var stackedBarChartMouseMove = function(d) {
+            $('#by-engagement div.tooltip')
+                .css({
+                    "left": d3.mouse(this)[0] + $(plot_id).offset().left + 100,
+                    "top": d3.mouse(this)[1] + $(plot_id).offset().top - 140
+                });
+        }
 
         // Show the bars
         svg.append("g")
@@ -182,6 +242,9 @@ $(document).ready(function() {
             .attr("y", function(d) { return y(d.data.category_title); })
             .attr("width", function(d) { return x(d[1]) - x(d[0]); })
             .attr("height", y.bandwidth())
+            .on("mouseover", stackedBarChartMouseOver)
+            .on("mousemove", stackedBarChartMouseMove)
+            .on("mouseout", stackedBarChartMouseOut);
 
 
         //subgroups legend
@@ -199,7 +262,7 @@ $(document).ready(function() {
             .data(subgroups)
             .enter()
             .append("text")
-            .attr("y", yLegend)
+            .attr("y", yLegend + 2)
             .attr("x", function(d, i) { return 14 + (i * 150); })
             .text(function(d) { return d.charAt().toUpperCase() + d.slice(1) })
             .style("fill", (_, i) => color(i))
@@ -215,12 +278,13 @@ $(document).ready(function() {
             .style("fill", "rgb(180, 180, 180)")
             .text("Engagement %");
 
+
         // Add country name to the chart
         svg.append("text")
             .attr("text-anchor", "end")
             .attr("x", width)
             .attr("y", 0)
-            .style("font-size", "18px")
+            .style("font-size", "22px")
             .style("fill", "#fff")
             .text(filter);
 
@@ -230,17 +294,17 @@ $(document).ready(function() {
 
     let createBubblePlot = function(data, country_colors, plot_id = BUBBLE_PLOT) {
 
-        let margin = { top: 100, right: 20, bottom: 30, left: 100 };
+        let margin = { top: 60, right: 20, bottom: 30, left: 100 };
         let filtered_data = [];
 
         data = $(data).each(function(_, d) {
             filtered_data.push({
                 key: d.country_name,
                 value: {
-                    comments: d.comments / 1e9,
-                    likes: d.likes / 1e9,
-                    dislikes: d.dislikes / 1e9,
-                    views: d.views / 1e9
+                    comments: Math.round(d.comments),
+                    likes: Math.round(d.likes),
+                    dislikes: Math.round(d.dislikes),
+                    views: Math.round(d.views)
                 }
             });
         });
@@ -256,8 +320,8 @@ $(document).ready(function() {
 
         // Add X axis
         var x = d3.scaleLinear()
-            .domain([1, d3.max(data, function(d) {
-                return d.value.likes + 1;
+            .domain([15e3, d3.max(data, function(d) {
+                return d.value.likes + 1e4;
             })])
             .range([0, width]);
 
@@ -274,12 +338,12 @@ $(document).ready(function() {
             .attr("y", height + 45)
             .style("font-size", "18px")
             .style("fill", "rgb(180, 180, 180)")
-            .text("Likes (billions)");
+            .text("Average Likes");
 
         // Add Y axis
         var y = d3.scaleLinear()
-            .domain([0.1, d3.max(data, function(d) {
-                return d.value.comments + 0.1;
+            .domain([15e2, d3.max(data, function(d) {
+                return d.value.comments + 2e3;
             })])
             .range([height, 0]);
 
@@ -290,7 +354,7 @@ $(document).ready(function() {
         svg.append("text")
             .attr("x", 10)
             .attr("y", 0)
-            .html("Comments (billions)")
+            .html("Average Comments (billions)")
             .style("font-size", "18px")
             .attr("text-anchor", "start");
 
@@ -305,10 +369,10 @@ $(document).ready(function() {
         // -2- Create 3 functions to show / update (when mouse move but stay on same circle) / hide the tooltip
         var bubblePlotMouseOver = function(d) {
             $('#by-engagement div.tooltip')
-                .html("<strong>Country:</strong> " + d.key + "<br/><strong>Views:</strong> " + d.value.views.toFixed(2) + " billion<br/><strong>Likes:</strong> " + d.value.likes.toFixed(2) + " billion<br/><strong>Comments:</strong> " + d.value.comments.toFixed(2) + " billion<br/><strong>Dislikes:</strong> " + d.value.dislikes.toFixed(2) + " billion<br/>Click for category drill-down.")
+                .html("<strong>" + d.key + "</strong><br/><strong>Views:</strong> " + formatN(d.value.views) + "<br/><strong>Likes:</strong> " + formatN(d.value.likes) + "<br/><strong>Dislikes:</strong> " + formatN(d.value.dislikes) + "<br/><strong>Comments:</strong> " + formatN(d.value.comments) + "<br/>Click to drill-down.")
                 .css({
-                    "left": d3.mouse(this)[0] + $(plot_id).offset().left + 120,
-                    "top": d3.mouse(this)[1] + $(plot_id).offset().top - 30,
+                    "left": d3.mouse(this)[0] + $(plot_id).offset().left + 130,
+                    "top": d3.mouse(this)[1] + $(plot_id).offset().top + 10,
                     "opacity": 1,
                     "display": "block"
                 });
@@ -318,6 +382,14 @@ $(document).ready(function() {
         var bubblePlotMouseOut = function(d) {
             $('#by-engagement div.tooltip').css({ "opacity": 0, "display": "none" });
             $("#bubble_plot [text='" + $(this).attr("text") + "']").toggleClass("hovered");
+        }
+
+        var bubblePlotMouseMove = function(d) {
+            $('#by-engagement div.tooltip')
+                .css({
+                    "left": d3.mouse(this)[0] + $(plot_id).offset().left + 130,
+                    "top": d3.mouse(this)[1] + $(plot_id).offset().top + 10
+                });
         }
 
         svg.append("g")
@@ -334,12 +406,13 @@ $(document).ready(function() {
             .style("fill", function(d) { return country_colors[d.key]; })
             // -3- Trigger the functions
             .on("mouseover", bubblePlotMouseOver)
+            .on("mousemove", bubblePlotMouseMove)
             .on("mouseout", bubblePlotMouseOut);
 
 
         // Add legend: circles
-        var valuesToShow = [50, 150, 300],
-            xCircle = width - 70,
+        var valuesToShow = [5e5, 20e5, 40e5],
+            xCircle = width - 85,
             xLabel = xCircle + 60,
             yHeight = height - 80;
 
@@ -374,7 +447,7 @@ $(document).ready(function() {
             .append("text")
             .attr('x', xLabel + 2)
             .attr('y', function(d) { return yHeight - z(d) })
-            .text(function(d) { return d })
+            .text(function(d) { return formatN(d, 0) })
             .style("font-size", 10)
             .attr('alignment-baseline', 'middle');
 
@@ -383,7 +456,7 @@ $(document).ready(function() {
             .attr('x', xCircle)
             .attr("y", yHeight + 30)
             .style("fill", "rgb(180, 180, 180)")
-            .text("Views (billions)")
+            .text("Views")
             .attr("text-anchor", "middle")
 
 
@@ -408,7 +481,7 @@ $(document).ready(function() {
             .enter()
             .append("text")
             .attr("class", "legend")
-            .attr("y", function(d, i) { return yLegend + (Math.floor(i / 6) * 30); })
+            .attr("y", function(d, i) { return yLegend + (Math.floor(i / 6) * 30) + 2; })
             .attr("x", function(d, i) { return 14 + ((i % 6) * (width / 6) * 1.05) % width })
             .style("fill", function(d) { return country_colors[d.key] })
             .attr("text", d => d.key)
@@ -468,6 +541,14 @@ $(document).ready(function() {
             $('#by-region div.tooltip').css({ "opacity": 0, "display": "none" });
         }
 
+        var bubbleMapMouseMove = function(d) {
+            $('#by-region div.tooltip')
+                .css({
+                    "left": d3.mouse(this)[0] + $(plot_id).offset().left + 10,
+                    "top": d3.mouse(this)[1] + $(plot_id).offset().top + 10,
+                });
+        }
+
         // Draw the map
         let color_pallete_no = {};
         let i = -1;
@@ -490,6 +571,7 @@ $(document).ready(function() {
             .attr("text", d => d.properties.name)
             .attr('title', d => d.properties.name + "<br/>Click here to drill-down")
             .on('mouseover', bubbleMapMouseOver)
+            .on('mousemove', bubbleMapMouseMove)
             .on('mouseout', bubbleMapMouseOut);
 
 
@@ -515,7 +597,7 @@ $(document).ready(function() {
             .style("fill", function(d) {
                 return color_pallete_no[d.country_name];
             })
-            .attr("title", d => d.country_name + "<br/><strong>Total videos:</strong> " + d.value.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"))
+            .attr("title", d => d.country_name + "<br/><strong>Total videos:</strong> " + formatN(d.value))
             .attr("text", d => d.country_name)
             .attr("data-value", d => d.value)
             .on('mouseover', bubbleMapMouseOver)
@@ -558,7 +640,7 @@ $(document).ready(function() {
             .append("text")
             .attr('x', xLabel + 2)
             .attr('y', function(d) { return yHeight - size(d) })
-            .text(function(d) { return d / 1000 + "K" })
+            .text(function(d) { return formatN(d, 0) })
             .style("font-size", "9px")
             .attr("fill", "rgb(180, 180, 180)")
             .attr('alignment-baseline', 'middle');
@@ -757,3 +839,17 @@ $(document).ready(function() {
         showPlot(plot_id, "slide");
     }
 });
+
+// let showSlider = function() {
+//     $("#slider-range").slider({
+//         range: true,
+//         min: 0,
+//         max: 500,
+//         values: [75, 300],
+//         slide: function(event, ui) {
+//             $("#amount").val("$" + ui.values[0] + " - $" + ui.values[1]);
+//         }
+//     });
+//     $("#amount").val("$" + $("#slider-range").slider("values", 0) +
+//         " - $" + $("#slider-range").slider("values", 1));
+// }
