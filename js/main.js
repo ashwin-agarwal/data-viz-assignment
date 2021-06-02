@@ -5,13 +5,17 @@ const GEOJSON_DATA_PATH = './data/filtered_countries.geojson',
     DOUGHTNUT_DATA_PATH = "./data/doughnut.csv",
     WORDCLOUD_DATA_PATH = "./data/wordcloud.csv",
     BUBBLE_PLOT_DATA_PATH = "./data/bubble_plot_data.csv",
-    STACKED_BAR_PLOT_PATH = "./data/stacked_barplot.csv";
+    STACKED_BAR_PLOT_PATH = "./data/stacked_barplot.csv",
+    CIRCULAR_BARPLOT_PATH = "./data/circular_barplot.csv",
+    LINE_CHART_PATH = "./data/line_chart.csv";
 
 const BUBBLE_PLOT = "#bubble_plot",
     BUBBLE_MAP = "#bubble_map",
     WORDCLOUD = "#wordcloud",
     DOUGHNUT = "#doughnut",
-    STACKED_BARCHART = "#stacked_barchart";
+    STACKED_BARCHART = "#stacked_barchart",
+    CIRCULAR_BARPLOT = "#circular_barplot",
+    LINE_CHART = "#line_chart";
 
 
 $(document).ready(function() {
@@ -30,7 +34,7 @@ $(document).ready(function() {
 
     $("a.nav-link[href='" + window.location.hash + "']").addClass('active');
 
-    let data_ready = function(_, geo_data, bubble_map_data, doughnut_data, wordcloud_data, bubble_plot_data, stacked_bar_plot_data) {
+    let data_ready = function(_, geo_data, bubble_map_data, doughnut_data, wordcloud_data, bubble_plot_data, stacked_bar_plot_data, circular_bar_plot_data, line_chart_data) {
         delete(bubble_map_data['columns']);
         let country_colors = createBubbleMap(geo_data, bubble_map_data);
 
@@ -45,6 +49,12 @@ $(document).ready(function() {
 
         delete(stacked_bar_plot_data['columns']);
         createStackedBarchart(stacked_bar_plot_data, "Overall");
+
+        delete(circular_bar_plot_data['columns']);
+        createCircularBarPlot(circular_bar_plot_data);
+
+        delete(line_chart_data['columns']);
+        createLineChart(line_chart_data);
 
         $('#bubble_map path, #bubble_map circle[id^=circle-]').each(function(_, d) {
             $(this).click(function() {
@@ -100,7 +110,36 @@ $(document).ready(function() {
             createStackedBarchart(stacked_bar_plot_data, country_selected);
         });
 
-        // showSlider();
+        $('input[name="country_select"]').click(function() {
+            let not_checked = $('input[name="country_select"]:not(checked)'),
+                checked = $('input[name="country_select"]:checked'),
+                overall = $('input[value="Overall"]');
+
+            if ($(this).val() == "Overall") {
+                if ($(this).prop("checked")) {
+                    not_checked.prop('checked', true);
+                } else {
+                    checked.prop('checked', false);
+                }
+            } else {
+                if (overall.prop('checked') && not_checked.length > 0) {
+                    overall.prop('checked', false);
+                } else if (!overall.prop('checked') && checked.length == 11) {
+                    overall.prop('checked', true);
+                }
+
+            }
+            createCircularBarPlot(circular_bar_plot_data);
+        });
+
+        $('input[name="top_channels"]').click(function() {
+            createCircularBarPlot(circular_bar_plot_data);
+        });
+
+        $('#channelN').change(function() {
+            $("#channel_count").text($('#channelN').val());
+            createCircularBarPlot(circular_bar_plot_data);
+        });
     }
 
 
@@ -111,19 +150,24 @@ $(document).ready(function() {
         .defer(d3.csv, WORDCLOUD_DATA_PATH)
         .defer(d3.csv, BUBBLE_PLOT_DATA_PATH)
         .defer(d3.csv, STACKED_BAR_PLOT_PATH)
+        .defer(d3.csv, CIRCULAR_BARPLOT_PATH)
+        .defer(d3.csv, LINE_CHART_PATH)
         .await(data_ready);
 
 
     let showPlot = function(id, effect = "fade") {
-        $('svg' + id).prev().fadeOut('slow', function() {
-            $(this).parent().find('[role="status"]').parent().remove()
-                // this.remove();
-            if (effect == "fade") {
-                $('svg' + id).fadeIn('slow');
-            } else if (effect == "slide") {
-                $('svg' + id).show('slide');
-            }
-        });
+
+        setTimeout(function() {
+            $('svg' + id).prev().fadeOut('slow', function() {
+                $(this).parent().find('[role="status"]').parent().remove()
+                    // this.remove();
+                if (effect == "fade") {
+                    $('svg' + id).fadeIn('slow');
+                } else if (effect == "slide") {
+                    $('svg' + id).show('slide');
+                }
+            });
+        }, 1000);
     }
 
     let formatN = function(n, decimal = 2) {
@@ -139,6 +183,201 @@ $(document).ready(function() {
         }
     }
 
+    let createLineChart = function(data, plot_id = LINE_CHART) {
+        console.log(data);
+        showPlot(plot_id);
+    }
+
+    let createCircularBarPlot = function(data, plot_id = CIRCULAR_BARPLOT) {
+        let sort_col = $('input[name="top_channels"]:checked').val();
+        let other_col = (sort_col == "views") ? "videos" : "views";
+        var color = (d3.schemeCategory10 + ',' + d3.schemePaired + ',' + d3.schemeDark2 + ',' + d3.schemeTableau10 + ',' + d3.schemeAccent + ',' + d3.schemeSet2 + ' ' + d3.schemeSet3 + ',' + d3.schemePastel1 + ',' + d3.schemePastel2 + ' ' + d3.schemeSet3 + ',' + d3.schemePastel1 + ',' + d3.schemePastel2).split(',');
+        color.splice(83, 1);
+        color.splice(55, 1);
+        color.splice(45, 1);
+        color.splice(15, 1);
+        color.splice(3, 1);
+
+        $(plot_id).empty();
+
+        var width = ($(plot_id).parent().width()),
+            height = ($(plot_id).parent().height()),
+            innerRadius = 160,
+            outerRadius = (Math.min(width, height) / 2) * 0.75,
+            svg = d3.select(plot_id)
+            .append("g")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("transform", "translate(" + (width / 2) + "," + ((height + 50) / 2) + ")");
+
+        let filter = [];
+
+        $('input[name="country_select"]:checked').each(function(d) {
+            filter.push($(this).val());
+        });
+
+        data = data.filter(function(d) {
+            if ($.inArray(d.country_name, filter) >= 0) {
+                return d;
+            }
+        });
+
+        data = d3.nest()
+            .key(function(d) { return d.channel_title; })
+            .rollup(function(v) {
+                return {
+                    videos: d3.sum(v, function(d) { return d.videos; }),
+                    views: d3.sum(v, function(d) { return d.views; }),
+                    country: d3.map(v, function(d) { return d.country_name }).keys()
+                };
+            })
+            .entries(data)
+            .sort(function(a, b) {
+                return +b.value[other_col] - +a.value[other_col];
+            })
+            .sort(function(a, b) {
+                return +b.value[sort_col] - +a.value[sort_col];
+            }).slice(0, $('#channelN').val());
+
+
+        // X scale: common for 2 data series
+        var x = d3.scaleBand()
+            .range([0, 2 * Math.PI]) // X axis goes from 0 to 2pi = all around the circle. If I stop at 1Pi, it will be around a half circle
+            .align(0) // This does nothing
+            .domain(data.map(function(d) { return d.key; })); // The domain of the X axis is the list of states.
+
+        var y = d3.scaleRadial()
+            .range([innerRadius, outerRadius]) // Domain will be define later.
+            .domain([d3.min(data, function(d) {
+                return d.value[sort_col] * 0.6;
+            }), d3.max(data, function(d) {
+                return d.value[sort_col];
+            })]); // Domain of Y is from 0 to the max seen in the data
+
+        // Second barplot Scales
+        var ybis = d3.scaleRadial()
+            .range([innerRadius, 5]) // Domain will be defined later.
+            .domain([d3.min(data, function(d) {
+                return d.value[other_col] * 0.5;
+            }), d3.max(data, function(d) {
+                return d.value[other_col];
+            })]);
+
+        let barplotMouseOver = function(d) {
+            $("." + $(this).attr("class")).toggleClass("hovered");
+
+            $('#by-channel div.tooltip')
+                .html(function() {
+                    if (sort_col == "views") {
+                        return "<strong>" + d.key + "</strong><br/><strong>Views:</strong> " + formatN(d.value.views) + " <br/><strong>Videos:</strong> " + d.value.videos;
+                    } else {
+                        return "<strong>" + d.key + "</strong><br/><strong>Videos:</strong> " + d.value.videos + " <br/><strong>Views:</strong> " + formatN(d.value.views);
+                    }
+                })
+                .css({
+                    "left": this.getBoundingClientRect().x,
+                    "top": $(window).scrollTop() + this.getBoundingClientRect().y - 100,
+                    "opacity": 1,
+                    "display": "block"
+                });
+        }
+
+        let barplotMouseMove = function(d) {
+            $('#by-channel div.tooltip')
+                .css({
+                    "left": this.getBoundingClientRect().x,
+                    "top": $(window).scrollTop() + this.getBoundingClientRect().y - 100
+                });
+        }
+
+        let barplotMouseOut = function() {
+            $(plot_id + " .hovered").removeClass("hovered");
+            $('#by-channel div.tooltip').css({ "opacity": 0, "display": "none" });
+        }
+
+        // Add the bars
+        svg.append("g")
+            .selectAll("path")
+            .data(data)
+            .enter()
+            .append("path")
+            .attr("fill", "#69b3a2")
+            .attr("class", function(_, i) {
+                return "circular_barplot_" + i;
+            })
+            .attr("fill", function(_, i) {
+                return color[i];
+            })
+            .attr("d", d3.arc() // imagine your doing a part of a donut plot
+                .innerRadius(innerRadius)
+                .outerRadius(function(d) { return y(d.value[sort_col]); })
+                .startAngle(function(d) { return x(d.key); })
+                .endAngle(function(d) { return x(d.key) + x.bandwidth(); })
+                .padAngle(0.01)
+                .padRadius(innerRadius))
+            .on("mouseover", barplotMouseOver)
+            .on("mousemove", barplotMouseMove)
+            .on("mouseout", barplotMouseOut);
+
+
+        // Add the second series
+        svg.append("g")
+            .selectAll("path")
+            .data(data)
+            .enter()
+            .append("path")
+            .attr("fill", "red")
+            .attr("class", function(_, i) {
+                return "circular_barplot_" + i;
+            })
+            .attr("d", d3.arc() // imagine your doing a part of a donut plot
+                .innerRadius(function(d) { return ybis(0) })
+                .outerRadius(function(d) {
+                    return ybis(d.value[other_col]);
+                })
+                .startAngle(function(d) { return x(d.key); })
+                .endAngle(function(d) { return x(d.key) + x.bandwidth(); })
+                .padAngle(0.01)
+                .padRadius(innerRadius))
+            .on("mouseover", barplotMouseOver)
+            .on("mousemove", barplotMouseMove)
+            .on("mouseout", barplotMouseOut);
+
+        // Add the labels
+        svg.append("g")
+            .selectAll("g")
+            .data(data)
+            .enter()
+            .append("g")
+            .attr("text-anchor", function(d) { return (x(d.key) + x.bandwidth() / 2 + Math.PI) % (2 * Math.PI) < Math.PI ? "end" : "start"; })
+            .attr("transform", function(d) { return "rotate(" + ((x(d.key) + x.bandwidth() / 2) * 180 / Math.PI - 90) + ")" + "translate(" + (y(d.value[sort_col]) + 10) + ",0)"; })
+            .append("text")
+            .attr("fill", function(_, i) {
+                return color[i];
+            })
+            .attr("class", function(_, i) {
+                return "circular_barplot_" + i;
+            })
+            .text(function(d) {
+                if (d.key.length > 18) {
+                    return (d.key.substring(0, 16) + "...");
+                }
+                return d.key;
+            })
+            .attr("transform", function(d) { return (x(d.key) + x.bandwidth() / 2 + Math.PI) % (2 * Math.PI) < Math.PI ? "rotate(180)" : "rotate(0)"; })
+            .style("font-size", "12px")
+            .attr("alignment-baseline", "middle")
+            .on("mouseover", barplotMouseOver)
+            .on("mousemove", barplotMouseMove)
+            .on("mouseout", barplotMouseOut);
+
+        d3.select(plot_id)
+            .append("g")
+            .selectAll("g");
+
+        showPlot(plot_id);
+    }
+
     let createStackedBarchart = function(data, filter = "Overall", plot_id = STACKED_BARCHART) {
 
         let margin = { top: 36, right: 60, bottom: 30, left: 210 };
@@ -149,7 +388,7 @@ $(document).ready(function() {
         $(plot_id).empty();
 
         var width = ($(plot_id).parent().width() - margin.left - margin.right),
-            height = ($(plot_id).parent().height() - margin.top - margin.bottom) * 0.6,
+            height = ($(plot_id).parent().height() - margin.top - margin.bottom) * 0.75,
             svg = d3.select(plot_id)
             .append("g")
             .attr("width", width + margin.left + margin.right)
@@ -313,9 +552,9 @@ $(document).ready(function() {
 
         var svg = d3.select(plot_id).append("g"),
             width = ($(plot_id).parent().width() - margin.left - margin.right),
-            height = ($(plot_id).parent().height() - margin.top - margin.bottom) * 0.6;
+            height = ($(plot_id).parent().height() - margin.top - margin.bottom) * 0.75;
 
-        svg.attr("width", $(plot_id).parent().width()).attr("height", $(plot_id).parent().height() * 0.6).attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        svg.attr("width", $(plot_id).parent().width()).attr("height", $(plot_id).parent().height() * 0.8).attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
         // Add X axis
@@ -500,8 +739,11 @@ $(document).ready(function() {
 
         // Map and projection
         var projection = d3.geoMercator()
-            .center([0, 25]) // GPS of location to zoom on
-            .scale(180) // This is like the zoom
+            .scale(width / 2 / Math.PI)
+            .rotate([-11, 0])
+            .precision(.1)
+            .center([0, 45]) // GPS of location to zoom on
+            .scale(170) // This is like the zoom
             .translate([width / 2, height / 2]);
 
         var color = d3.schemePaired;
@@ -607,7 +849,7 @@ $(document).ready(function() {
         var valuesToShow = [45000, 90000],
             xCircle = 70,
             xLabel = xCircle + 60,
-            yHeight = height - 150;
+            yHeight = height - 30;
 
         svg
             .selectAll("legend")
@@ -655,8 +897,8 @@ $(document).ready(function() {
             .attr("text-anchor", "middle")
 
         //country legend
-        var yLegend = height - 180,
-            xLegend = width - 600;
+        var yLegend = height - 50,
+            xLegend = width * 0.45;
 
         svg.selectAll(plot_id)
             .data(counts_by_region.sort(function(a, b) {
@@ -704,8 +946,8 @@ $(document).ready(function() {
         $(plot_id).empty();
 
         var svg = d3.select(plot_id).append("g"),
-            width = $(plot_id).parent().width(),
-            height = $(plot_id).parent().height() - 100;
+            width = $(plot_id).parent().width() * 0.9,
+            height = $(plot_id).parent().height() * 0.9;
 
 
         var color = d3.scaleOrdinal(d3.schemeTableau10);
@@ -714,7 +956,7 @@ $(document).ready(function() {
             .domain([0, d3.max(data, function(d) {
                 return d.size;
             })])
-            .range([0, 18]);
+            .range([1, 20]);
 
         d3.layout.cloud().size([width, height])
             .timeInterval(20)
@@ -838,18 +1080,6 @@ $(document).ready(function() {
 
         showPlot(plot_id, "slide");
     }
-});
 
-// let showSlider = function() {
-//     $("#slider-range").slider({
-//         range: true,
-//         min: 0,
-//         max: 500,
-//         values: [75, 300],
-//         slide: function(event, ui) {
-//             $("#amount").val("$" + ui.values[0] + " - $" + ui.values[1]);
-//         }
-//     });
-//     $("#amount").val("$" + $("#slider-range").slider("values", 0) +
-//         " - $" + $("#slider-range").slider("values", 1));
-// }
+    $("#channel_count").text($('#channelN').val());
+});

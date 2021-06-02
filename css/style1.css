@@ -29,28 +29,23 @@
 #home,
 #by-region,
 #by-engagement,
-#by-channel {
+#by-channel,
+#references {
     text-shadow: 0 .05rem .1rem rgba(0, 0, 0, .5);
     box-shadow: inset 0 0 5rem rgba(0, 0, 0, .5);
     color: #fff;
 }
 
-#by-region {
+#by-region,
+#by-channel {
     background-color: #282828;
 }
 
-#by-engagement {
+#by-engagement,
+#references {
     /* background-color: #1A1A1D; */
     /* background-color: #757575; */
     background-color: #19181A;
-    /* background-color: #1F2833; */
-    /* background-color: #0B0C10; */
-}
-
-#by-channel {
-    background-color: #1A1A1D;
-    /* background-color: #757575; */
-    /* background-color: #19181A; */
     /* background-color: #1F2833; */
     /* background-color: #0B0C10; */
 }
@@ -71,8 +66,9 @@
  */
 
 header {
-    opacity: 0.8;
+    opacity: 0.85;
     border-bottom: 1px solid black;
+    height: 85px;
 }
 
 header h3 {
@@ -150,11 +146,13 @@ a:hover {
 #doughnut,
 #wordcloud,
 #bubble_plot,
-#stacked_barchart {
+#stacked_barchart,
+#circular_barplot {
     display: none;
 }
 
-#by-region path {
+#by-region path,
+#by-channel path {
     opacity: 0.7;
 }
 
@@ -168,7 +166,9 @@ a:hover {
 #by-region path.hovered,
 #stacked_barchart rect:hover,
 #by-engagement circle:hover,
-#by-engagement circle.hovered {
+#by-engagement circle.hovered,
+#by-channel path:hover,
+#by-channel path.hovered {
     stroke: black;
     opacity: 1;
     cursor: pointer;
@@ -191,7 +191,9 @@ a:hover {
 }
 
 #bubble_map text.hovered,
-#bubble_map text:hover {
+#bubble_map text:hover,
+#circular_barplot text:hover,
+#circular_barplot text.hovered {
     text-decoration: underline;
     cursor: default;
 }
@@ -243,7 +245,8 @@ text.doughnut_center {
 }
 
 #by-engagement line,
-#by-engagement path {
+#by-engagement path,
+#circular_barplot path {
     stroke: rgb(180, 180, 180);
     stroke-width: 3px;
 }
@@ -261,4 +264,18 @@ text.doughnut_center {
     color: rgb(180, 180, 180);
     margin-right: 30px;
     margin-left: 180px;
+    font-size: 1em;
+}
+
+#by-engagement .country_select {
+    color: rgb(180, 180, 180);
+    margin-left: 100px;
+}
+
+#by-channel text {
+    font-weight: 500;
+}
+
+#channelN .slider-selection {
+    background: #BABABA;
 }

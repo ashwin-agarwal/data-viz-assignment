@@ -19,9 +19,9 @@
     <meta name="description" content="">
     <title>Analyzing the trending videos on YouTube</title>
 
-    <script src="./js/bootstrap.min.js"></script>
     <script src="./js/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="./js/bootstrap.min.js"></script>
+    <script src="./js/bootstrap-slider.min.js"></script>
     <script src="./js/main.js"></script>
 
     <!-- Load d3.js and the geo projection plugin -->
@@ -29,13 +29,13 @@
     <script src="./js/d3-geo-projection.v2.min.js"></script>
     <script src="./js/d3-scale-chromatic.v1.min.js"></script>
     <script src="./js/d3-color.v1.min.js"></script>
-    <script src="./js/d3-interpolate.v1.min.js"></script>
     <script src="./js/d3.layout.cloud.js"></script>
+    <script src="./js/d3-scale-radial.js"></script>
 
     <link rel="stylesheet" href="./css/style1.css" />
     <link rel="stylesheet" href="./css/bootstrap.min.css" />
     <link rel="shortcut icon" href="./images/favicon.ico" />
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
 </head>
 
 <body class="w-100">
@@ -68,13 +68,13 @@
                 <div class="tooltip text-dark bg-white"></div>
                 <div class="row h-100">
                     <div class="col-lg-8 h-100">
-                        <div class="h-20">
+                        <div style="height: 15%;">
                             <h3>What kind of videos trend in each region?</h3>
                             <p>This visualization shows the categories and tags that trend in each region.</p>
                             <p>Click on the regions in the map to drill-down and see trending categories and tags for that particular region. Click the same region again to see the overall view.
                             </p>
                         </div>
-                        <div class="h-100">
+                        <div style="height: 85%;">
                             <div class="d-flex justify-content-center h-100 align-items-center">
                                 <div class="spinner-border" role="status">
                                 </div>
@@ -110,7 +110,7 @@
 
                 <div class="tooltip text-dark bg-white"></div>
 
-                <div class="row h-100 mt-5">
+                <div class="row mt-5" style="height: 80%;">
                     <div class="col h-100 mt-1">
                         <div class="h-100">
                             <div class="d-flex justify-content-center h-100 align-items-center">
@@ -121,10 +121,10 @@
                         </div>
                     </div>
 
-                    <div class="h-100 col mt-1">
+                    <div class="h-100 col">
                         <div class="text-center d-print-inline sort_radio">
                             <div class="form-check-inline">
-                                <span>Sort by:</span>
+                                <span>SORT BY</span>
                             </div>
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="sort_radio" id="likes" value="likes" checked>
@@ -157,22 +157,120 @@
 
                     </div>
 
-                    <!-- <div id="slider-container" class="container h-25">
-                        <div class="row justify-content-center p-5">
-                            <div id="slider-range" class="w-50"></div>
-                        </div>
-
-                    </div> -->
-
                 </div>
 
 
             </div>
         </div>
         <div id="by-channel">
-            <div class="p-4">
-                <h3>Which channels have trending videos?</h3>
-                <p></p>
+            <div class="p-4 h-100">
+                <div style="height: 20%;">
+                    <h3>Which channels have trending videos?</h3>
+                    <p>The following visualizations show information about the channels that have the most trending videos on the basis of views or video count. Please select the basis, countries, and the number of channels that you wish to see.
+                    </p>
+                    <p>Click the channel bar to see the distribution of trending videos by category and time for that specific channel. Click the bar again to see the default overall view.</p>
+                </div>
+                <div class="tooltip text-dark bg-white"></div>
+
+                <div class="row" style="height: 80%;">
+                    <div class="h-100" style="width: 44%;">
+                        <div class="h-100">
+                            <div class="d-flex justify-content-center h-100 align-items-center">
+                                <div class="spinner-border" role="status">
+                                </div>
+                            </div>
+                            <svg id="circular_barplot" width="100%" height="100%"></svg>
+                        </div>
+                    </div>
+                    <div class="h-100 d-flex align-items-center p-1" style="width: 12%;">
+                        <div>
+                            <div class="top_channels">
+                                <div class="form-check">
+                                    <span>BASIS</span>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="top_channels" id="radio-views" value="views" checked>
+                                    <label class="form-check-label" for="radio-views">Views</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="top_channels" id="radio-videos" value="videos">
+                                    <label class="form-check-label" for="radio-videos">Videos</label>
+                                </div>
+                            </div>
+                            <br/>
+                            <div class="country_select">
+                                <div class="form-check">
+                                    <span>COUNTRIES</span>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-all" value="Overall" checked>
+                                    <label class="form-check-label" for="checkbox-all">All</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-brazil" value="Brazil" checked>
+                                    <label class="form-check-label" for="checkbox-brazil">Brazil</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-canada" value="Canada" checked>
+                                    <label class="form-check-label" for="checkbox-canada">Canada</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-france" value="France" checked>
+                                    <label class="form-check-label" for="checkbox-france">France</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-germany" value="Germany" checked>
+                                    <label class="form-check-label" for="checkbox-germany">Germany</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-india" value="India" checked>
+                                    <label class="form-check-label" for="checkbox-india">India</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-japan" value="Japan" checked>
+                                    <label class="form-check-label" for="checkbox-japan">Japan</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-mexico" value="Mexico" checked>
+                                    <label class="form-check-label" for="checkbox-mexico">Mexico</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-russia" value="Russia" checked>
+                                    <label class="form-check-label" for="checkbox-russia">Russia</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-skorea" value="S Korea" checked>
+                                    <label class="form-check-label" for="checkbox-skorea">S Korea</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-uk" value="UK" checked>
+                                    <label class="form-check-label" for="checkbox-uk">UK</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-usa" value="USA" checked>
+                                    <label class="form-check-label" for="checkbox-usa">USA</label>
+                                </div>
+                            </div>
+                            <br/>
+                            <div class="form-check">
+                                <label for="channelN" class="form-label">CHANNELS (<span id="channel_count"></span>)</label>
+                                <input type="range" class="form-range form-check-input" min="5" max="100" step="1" id="channelN" value="30">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="h-100" style="width: 44%;">
+                        <div class="h-100">
+                            <div class="d-flex justify-content-center h-100 align-items-center">
+                                <div class="spinner-border" role="status">
+                                </div>
+                            </div>
+                            <svg id="line_chart" width="100%" height="100%"></svg>
+                        </div>
+
+                    </div>
+
+                </div>
             </div>
         </div>
         <div id="references">
