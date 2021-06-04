@@ -19,8 +19,6 @@ const BUBBLE_PLOT = "#bubble_plot",
 
 let sliderChange;
 
-alert("For best experience, please click the 'Toggle Fullscreen' button and view the page in full screen");
-
 $(document).ready(function() {
     $("#btn-fullscreen").click(function() {
         // https://stackoverflow.com/questions/13303151/getting-fullscreen-mode-to-my-browser-using-jquery
@@ -1294,4 +1292,5 @@ $(document).ready(function() {
 
         showPlot(plot_id);
     }
+    alert("For best experience, please click the 'Toggle Fullscreen' button and view the page in full screen");
 });
