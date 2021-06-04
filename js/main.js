@@ -134,8 +134,10 @@ $(document).ready(function() {
         });
 
         let circularBarplotClick = function() {
-            createCircularBarPlot(circular_bar_plot_data);
-            createLineChart(line_chart_data);
+            setTimeout(function() {
+                createCircularBarPlot(circular_bar_plot_data);
+                createLineChart(line_chart_data);
+            }, 10);
 
             $('[class^="circular_barplot_"]:not(text)').click(function() {
                 $('#circular_barplot .highlight').removeClass("highlight");
