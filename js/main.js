@@ -1386,8 +1386,8 @@ $(document).ready(function() {
         </ul>`, `
         <ul>
             <li>When looking from a views perspective, most channels with higher views are producing "Music" videos. World recognized artists such as Cardi B, DJ Khaled, BlackEyedPeas etc have higher views overall, and trend in most of these countries.</li>
-            <li>When looking from the number of trending videos perspective, channels like ColorsTV, Vijay Television, Sports Channels, etc that produce daily entertainment and sports videos trend more. Although they have more number of trending videos, but at a given time, they have only 5-10 videos trending (as per the line chart).</li>
-            <li>If a content creator is looking to tie up with channels that have more views, they should go with top music channels as per views. However, if there are looking for advertisement to the same set of people, then they should consider channels that more number of videos in the "Entertainment" and "Sports" category. From this visualization, it is easy for them to identify which channels they should target based on their requirement.</li>
+            <li>Basis the number of trending videos, channels like ColorsTV, Vijay Television, Sports Channels, etc that produce daily entertainment and sports videos trend more. Overall they have more trending videos, but at a given time, they have only 5-10 videos (as per the line chart).</li>
+            <li>If a content creator is looking to tie up with channels that have more views, they should go with top music channels. However, if advertisement to the same set of people is the focus, then they could consider "Entertainment" and "Sports" category. This visualization makes it easy for content creators to identify the channels they should target based on their requirement.</li>
         </ul>`];
 
         $('#insights .modal-body').html(modal_body[$(this).attr("data-index")]);
