@@ -114,9 +114,9 @@ $(document).ready(function() {
         delete(circular_bar_plot_data['columns']);
         delete(line_chart_data['columns']);
 
-        $('#bubble_map path, #bubble_map circle[id^=circle-]').each(function(_, d) {
+        $('#bubble_map path, #bubble_map circle[id^=circle-],[id^=legend_circle]').each(function(_, d) {
             $(this).click(function() {
-                let path_id = $(this).attr('id').replace('circle', 'map');
+                let path_id = $(this).attr('id').replace('legend_circle', 'map').replace('circle', 'map');
 
                 if ($('#' + path_id).hasClass('highlight')) {
                     $('#bubble_map path').removeClass("faded").removeClass("highlight");
@@ -1016,10 +1016,10 @@ $(document).ready(function() {
             $(plot_id + " #legend_circle-" + $(this).attr('id').split('-')[1]).toggleClass('hovered');
             $(plot_id + " #legend_text-" + $(this).attr('id').split('-')[1]).toggleClass('hovered');
 
-            $('div.tooltip').html("<strong>Country:</strong> " + $(this).attr('title'))
+            $('div.tooltip').html("<strong>Country:</strong> " + $("#circle-" + $(this).attr('id').split('-')[1]).attr("title"))
                 .css({
-                    "left": mouseposition.x - 120,
-                    "top": mouseposition.y - 80,
+                    "left": mouseposition.x - 100,
+                    "top": mouseposition.y - 120,
                     "opacity": 1,
                     "display": "block"
                 });
@@ -1036,8 +1036,8 @@ $(document).ready(function() {
         var bubbleMapMouseMove = function(d) {
             $('div.tooltip')
                 .css({
-                    "left": mouseposition.x - 120,
-                    "top": mouseposition.y - 80,
+                    "left": mouseposition.x - 100,
+                    "top": mouseposition.y - 120,
                 });
         }
 
@@ -1056,7 +1056,6 @@ $(document).ready(function() {
             )
             .attr("id", d => "map-" + d.properties.name.replace(' ', '_').toLowerCase())
             .attr("text", d => d.properties.name)
-            .attr('title', d => d.properties.name + "<br/>Click here to drill-down")
             .on('mouseover', bubbleMapMouseOver)
             .on('mousemove', bubbleMapMouseMove)
             .on('mouseout', bubbleMapMouseOut);
@@ -1084,7 +1083,7 @@ $(document).ready(function() {
             .style("fill", function(d) {
                 return country_colors[d.country_name];
             })
-            .attr("title", d => d.country_name + "<br/><strong>Total videos:</strong> " + formatN(d.value))
+            .attr("title", d => d.country_name + "<br/><strong>Total videos:</strong> " + formatN(d.value) + "<br/>Click here to drill-down")
             .attr("text", d => d.country_name)
             .attr("data-value", d => d.value)
             .on('mouseover', bubbleMapMouseOver)
@@ -1157,7 +1156,6 @@ $(document).ready(function() {
             .attr("cx", function(d, i) { return xLegend + ((i % 6) * (width / 11)) % width })
             .attr("r", 7)
             .style("fill", function(d) { return country_colors[d.country_name]; })
-            .attr("title", d => d.country_name + "<br/>Click map to drill-down")
             .on("mouseover", bubbleMapMouseOver)
             .on("mouseout", bubbleMapMouseOut);
 
