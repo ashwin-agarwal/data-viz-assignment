@@ -19,6 +19,8 @@ const BUBBLE_PLOT = "#bubble_plot",
 
 let sliderChange;
 
+alert("For best experience, please click the 'Toggle Fullscreen' button and view the page in full screen");
+
 $(document).ready(function() {
     $("#btn-fullscreen").click(function() {
         // https://stackoverflow.com/questions/13303151/getting-fullscreen-mode-to-my-browser-using-jquery
@@ -955,7 +957,7 @@ $(document).ready(function() {
             .rotate([-11, 0])
             .precision(.1)
             .center([0, 45]) // GPS of location to zoom on
-            .scale(170) // This is like the zoom
+            .scale(160) // This is like the zoom
             .translate([width / 2, height / 2]);
 
         var color = d3.schemePaired;

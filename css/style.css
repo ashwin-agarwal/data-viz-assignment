@@ -20,8 +20,7 @@
 #home,
 #by-region,
 #by-engagement,
-#by-channel,
-#references {
+#by-channel {
     padding-top: 84px;
     height: 100vh;
 }
@@ -288,7 +287,7 @@ text.doughnut_center {
     color: rgb(180, 180, 180);
     margin-right: 30px;
     margin-left: 180px;
-    font-size: 0.9em;
+    font-size: 0.8em;
 }
 
 #by-engagement .country_select {
