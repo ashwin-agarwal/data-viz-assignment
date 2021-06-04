@@ -405,8 +405,8 @@ $(document).ready(function() {
 
         var width = ($(plot_id).parent().width()) * 0.9,
             height = ($(plot_id).parent().height()) * 0.9,
-            innerRadius = 160,
-            outerRadius = (Math.min(width, height) / 2) * 0.75,
+            innerRadius = 130,
+            outerRadius = (Math.min(width, height) / 2) * 0.8,
             svg = d3.select(plot_id)
             .append("g")
             .attr("width", width)
@@ -1059,7 +1059,7 @@ $(document).ready(function() {
         var valuesToShow = [43000, 47000],
             xCircle = 70,
             xLabel = xCircle + 60,
-            yHeight = height - 30;
+            yHeight = height - 50;
 
         svg
             .selectAll("legend")
@@ -1107,7 +1107,7 @@ $(document).ready(function() {
             .attr("text-anchor", "middle")
 
         //country legend
-        var yLegend = height - 50,
+        var yLegend = height - 70,
             xLegend = width * 0.45;
 
         svg.selectAll(plot_id)
@@ -1213,7 +1213,7 @@ $(document).ready(function() {
         var svg = d3.select(plot_id).append("g"),
             width = $(plot_id).parent().width(),
             height = $(plot_id).parent().height(),
-            radius = (Math.min(width, height) / 2) * 0.6;
+            radius = (Math.min(width, height) / 2) * 0.5;
 
         // var color = d3.scaleOrdinal(d3.schemeCategory10);
         var color = (d3.schemeCategory10 + ',' + d3.schemePaired).split(',');
@@ -1229,7 +1229,7 @@ $(document).ready(function() {
         var data_ready = pie(d3.entries(data));
 
         var arc = d3.arc()
-            .innerRadius(80) // This is the size of the donut hole
+            .innerRadius(60) // This is the size of the donut hole
             .outerRadius(radius);
 
         var outerArc = d3.arc()
