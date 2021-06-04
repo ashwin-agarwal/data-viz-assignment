@@ -20,6 +20,33 @@ const BUBBLE_PLOT = "#bubble_plot",
 let sliderChange;
 
 $(document).ready(function() {
+    $("#btn-fullscreen").click(function() {
+        // https://stackoverflow.com/questions/13303151/getting-fullscreen-mode-to-my-browser-using-jquery
+        if (!document.fullscreenElement && // alternative standard method
+            !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) { // current working methods
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.msRequestFullscreen) {
+                document.documentElement.msRequestFullscreen();
+            } else if (document.documentElement.mozRequestFullScreen) {
+                document.documentElement.mozRequestFullScreen();
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+            }
+            read_data();
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
+        }
+    });
+
     var observer = new IntersectionObserver(function(entries) {
         if (entries[0].isIntersecting === true) {
             let target_id = entries[0].target.id;
@@ -158,17 +185,20 @@ $(document).ready(function() {
     }
 
 
+    let read_data = function() {
+        d3.queue()
+            .defer(d3.json, GEOJSON_DATA_PATH)
+            .defer(d3.csv, BUBBLE_MAP_DATA_PATH)
+            .defer(d3.csv, DOUGHTNUT_DATA_PATH)
+            .defer(d3.csv, WORDCLOUD_DATA_PATH)
+            .defer(d3.csv, BUBBLE_PLOT_DATA_PATH)
+            .defer(d3.csv, STACKED_BAR_PLOT_PATH)
+            .defer(d3.csv, CIRCULAR_BARPLOT_PATH)
+            .defer(d3.csv, LINE_CHART_PATH)
+            .await(data_ready);
+    }
+    read_data();
 
-    d3.queue()
-        .defer(d3.json, GEOJSON_DATA_PATH)
-        .defer(d3.csv, BUBBLE_MAP_DATA_PATH)
-        .defer(d3.csv, DOUGHTNUT_DATA_PATH)
-        .defer(d3.csv, WORDCLOUD_DATA_PATH)
-        .defer(d3.csv, BUBBLE_PLOT_DATA_PATH)
-        .defer(d3.csv, STACKED_BAR_PLOT_PATH)
-        .defer(d3.csv, CIRCULAR_BARPLOT_PATH)
-        .defer(d3.csv, LINE_CHART_PATH)
-        .await(data_ready);
 
     let showPlot = function(id, effect = "fade") {
 
@@ -730,6 +760,7 @@ $(document).ready(function() {
 
         data = filtered_data;
 
+        $(plot_id).empty();
         var svg = d3.select(plot_id).append("g"),
             width = ($(plot_id).parent().width() - margin.left - margin.right),
             height = ($(plot_id).parent().height() - margin.top - margin.bottom) * 0.7;
@@ -912,6 +943,7 @@ $(document).ready(function() {
     }
 
     let createBubbleMap = function(dataGeo, counts_by_region, plot_id = BUBBLE_MAP) {
+        $(plot_id).empty();
         // The svg
         var svg = d3.select(plot_id),
             width = $(plot_id).parent().width(),
@@ -1261,29 +1293,3 @@ $(document).ready(function() {
         showPlot(plot_id);
     }
 });
-
-function toggleFullScreen() {
-    // https://stackoverflow.com/questions/13303151/getting-fullscreen-mode-to-my-browser-using-jquery
-    if (!document.fullscreenElement && // alternative standard method
-        !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) { // current working methods
-        if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen();
-        } else if (document.documentElement.msRequestFullscreen) {
-            document.documentElement.msRequestFullscreen();
-        } else if (document.documentElement.mozRequestFullScreen) {
-            document.documentElement.mozRequestFullScreen();
-        } else if (document.documentElement.webkitRequestFullscreen) {
-            document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-        }
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.msExitFullscreen) {
-            document.msExitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-            document.mozCancelFullScreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        }
-    }
-}
