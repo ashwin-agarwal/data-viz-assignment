@@ -38,17 +38,17 @@ const cat_colors = {
 };
 
 const country_colors = {
-    "Brazil": "#a6cee3",
-    "Canada": "#1f78b4",
-    "France": "#33a02c",
-    "Germany": "#b2df8a",
-    "India": "#e31a1c",
-    "Japan": "#fdbf6f",
-    "Mexico": "#cab2d6",
-    "Russia": "#6a3d9a",
-    "S Korea": "#ff7f00",
-    "UK": "#fb9a99",
-    "USA": "#ffff99"
+    "Brazil": "#3949AB",
+    "Canada": "#00897B",
+    "France": "#6D4C41",
+    "Germany": "#F4511E",
+    "India": "#D81B60",
+    "Japan": "#DD2C00",
+    "Mexico": "#00ACC1",
+    "Russia": "#8E24AA",
+    "S Korea": "#FF9999",
+    "UK": "#4A148C",
+    "USA": "#FFB300"
 };
 
 let sliderChange, mouseposition = {};
