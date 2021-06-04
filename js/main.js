@@ -221,8 +221,8 @@ $(document).ready(function() {
 
         $(plot_id).empty();
 
-        var width = ($(plot_id).parent().width()) * 0.8,
-            height = ($(plot_id).parent().height()) * 0.75,
+        var width = ($(plot_id).parent().width()) * 0.75,
+            height = ($(plot_id).parent().height()) * 0.65,
             svg = d3.select(plot_id)
             .append("g")
             .attr("width", width)
@@ -375,8 +375,8 @@ $(document).ready(function() {
 
         $(plot_id).empty();
 
-        var width = ($(plot_id).parent().width()),
-            height = ($(plot_id).parent().height()),
+        var width = ($(plot_id).parent().width()) * 0.9,
+            height = ($(plot_id).parent().height()) * 0.9,
             innerRadius = 160,
             outerRadius = (Math.min(width, height) / 2) * 0.75,
             svg = d3.select(plot_id)
@@ -568,7 +568,7 @@ $(document).ready(function() {
         $(plot_id).empty();
 
         var width = ($(plot_id).parent().width() - margin.left - margin.right),
-            height = ($(plot_id).parent().height() - margin.top - margin.bottom) * 0.75,
+            height = ($(plot_id).parent().height() - margin.top - margin.bottom) * 0.7,
             svg = d3.select(plot_id)
             .append("g")
             .attr("width", width + margin.left + margin.right)
@@ -732,22 +732,22 @@ $(document).ready(function() {
 
         var svg = d3.select(plot_id).append("g"),
             width = ($(plot_id).parent().width() - margin.left - margin.right),
-            height = ($(plot_id).parent().height() - margin.top - margin.bottom) * 0.75;
+            height = ($(plot_id).parent().height() - margin.top - margin.bottom) * 0.7;
 
         svg.attr("width", $(plot_id).parent().width()).attr("height", $(plot_id).parent().height() * 0.8).attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
         // Add X axis
         var x = d3.scaleLinear()
-            .domain([15e3, d3.max(data, function(d) {
-                return d.value.likes + 1e4;
+            .domain([35e3, d3.max(data, function(d) {
+                return d.value.likes + 2e4;
             })])
             .range([0, width]);
 
         // X axis labels
         svg.append("g")
             .attr("transform", "translate(0," + height + ")")
-            .call(d3.axisBottom(x).ticks(5));
+            .call(d3.axisBottom(x).ticks(5).tickFormat(d => formatN(d, 0)));
 
 
         // Add X axis name
@@ -761,13 +761,13 @@ $(document).ready(function() {
 
         // Add Y axis
         var y = d3.scaleLinear()
-            .domain([15e2, d3.max(data, function(d) {
+            .domain([35e2, d3.max(data, function(d) {
                 return d.value.comments + 2e3;
             })])
             .range([height, 0]);
 
         svg.append("g")
-            .call(d3.axisLeft(y).ticks(5));
+            .call(d3.axisLeft(y).ticks(5).tickFormat(d => formatN(d, 0)));
 
         // Add Y axis label:
         svg.append("text")
@@ -783,7 +783,7 @@ $(document).ready(function() {
             .domain([1, d3.max(data, function(d) {
                 return d.value.views;
             })])
-            .range([2, 50]);
+            .range([2, 40]);
 
         // -2- Create 3 functions to show / update (when mouse move but stay on same circle) / hide the tooltip
         var bubblePlotMouseOver = function(d) {
