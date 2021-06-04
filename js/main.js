@@ -35,7 +35,6 @@ $(document).ready(function() {
             } else if (document.documentElement.webkitRequestFullscreen) {
                 document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
             }
-            read_data();
         } else {
             if (document.exitFullscreen) {
                 document.exitFullscreen();
@@ -47,6 +46,7 @@ $(document).ready(function() {
                 document.webkitExitFullscreen();
             }
         }
+        read_data();
     });
 
     var observer = new IntersectionObserver(function(entries) {
