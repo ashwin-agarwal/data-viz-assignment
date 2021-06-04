@@ -131,12 +131,6 @@ header h3 {
     /* background-color: #FF0000; */
 }
 
-.bulb {
-    background: url(../images/lightbulb-fill.svg);
-    background-size: 16px 16px;
-    display: block;
-}
-
 a:hover {
     color: #FF0000;
 }
@@ -320,4 +314,23 @@ text.doughnut_center {
 .user_interaction *,
 .sort_radio {
     display: none;
+}
+
+.interesting-insights {
+    float: right;
+    color: #fff;
+}
+
+.interesting-insights:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.bulb {
+    background: url(../images/lightbulb.svg) no-repeat;
+    width: 20px;
+    height: 20px;
+    content: "";
+    display: inline;
+    float: right;
 }

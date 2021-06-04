@@ -656,7 +656,7 @@ $(document).ready(function() {
         // color palette = one color per subgroup
         var color = d3.scaleOrdinal()
             .domain(subgroups)
-            .range(['#7fff00', '#15f4ee', '#ff0000']);
+            .range(['#7efe00', '#00fefe', '#fa0000']);
 
 
         //stack the data? --> stack per subgroup
@@ -1343,8 +1343,8 @@ $(document).ready(function() {
 
     $("#pageLoadModal").modal('show');
 
-    $('#pageLoadModal button').click(function() {
-        $("#pageLoadModal").modal('hide');
+    $('.modal button').click(function() {
+        $(".modal").modal('hide');
     });
 
     $("a.nav-link[href='" + window.location.hash + "']").addClass('active');
@@ -1353,4 +1353,47 @@ $(document).ready(function() {
         mouseposition.x = event.pageX;
         mouseposition.y = event.pageY;
     });
+
+    $('.interesting-insights').on("mouseover", function() {
+        $('div.tooltip').html("<div class='text-center'>Click here for interesting insights</div>")
+            .css({
+                "left": mouseposition.x - 100,
+                "top": mouseposition.y - 100,
+                "opacity": 1,
+                "display": "block"
+            });
+    }).on("mousemove", function() {
+        $('div.tooltip')
+            .css({
+                "left": mouseposition.x - 100,
+                "top": mouseposition.y - 100
+            });
+    }).on("mouseout", function() {
+        $('div.tooltip').css({ "opacity": 0, "display": "none" });
+    }).on("click", function() {
+
+        let modal_body = [`
+        <ul>
+            <li>Russia is the only country that has "News & Politics" in the top three trending categories. All other countries have "Entertainment" and "Music" in the top three</li>
+            <li>While comedy videos may not be high in number, the word cloud suggests that every country loves to laugh. We see that "Comedy" and "Funny" are the prominent keywords in the overall word cloud.</li>
+            <li>There is equal number of trending videos for all 11 countries, which means that each country contributes equal data to the analysis and visualization.</li>
+        </ul>`, `
+        <ul>
+            <li>We can see that as views (bubble size) increase, the likes/comments also increase almost linearly. This shows a clear correlation between likes, views, comments.</li>
+            <li>"News & Politics" are most disliked and most commented categories in most of the countries. This trend appears particularly because if a "News & Politics" category video trends, it is mostly because the video is talking about something really good or something ridiculously bad.</li>
+            <li>In all countries, except Japan, "Music" videos have the highest views. Japan is the only country where the most viewed category is "Science & Technology".</li>
+            <li>People engage more in "Music" and "Comedy" videos. If a content creator is looking to target higher engagement videos, they should go for these categories.</li>
+        </ul>`, `
+        <ul>
+            <li>When looking from a views perspective, most channels with higher views are producing "Music" videos. World recognized artists such as Cardi B, DJ Khaled, BlackEyedPeas etc have higher views overall, and trend in most of these countries.</li>
+            <li>When looking from the number of trending videos perspective, channels like ColorsTV, Vijay Television, Sports Channels, etc that produce daily entertainment and sports videos trend more. Although they have more number of trending videos, but at a given time, they have only 5-10 videos trending (as per the line chart).</li>
+            <li>If a content creator is looking to tie up with channels that have more views, they should go with top music channels as per views. However, if there are looking for advertisement to the same set of people, then they should consider channels that more number of videos in the "Entertainment" and "Sports" category. From this visualization, it is easy for them to identify which channels they should target based on their requirement.</li>
+        </ul>`];
+
+        $('#insights .modal-body').html(modal_body[$(this).attr("data-index")]);
+
+        $("#insights").modal('show');
+    });
+
+
 });
