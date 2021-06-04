@@ -49,14 +49,19 @@
     /* background-color: #0B0C10; */
 }
 
-#home div {
+#home .intro {
     position: absolute;
-    padding-top: 84px;
+    /* padding-top: 84px; */
     top: 50%;
     left: 50%;
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
     width: 100%;
+}
+
+#home .footer {
+    position: absolute;
+    bottom: 30px;
 }
 
 
@@ -124,6 +129,12 @@ header h3 {
     background-size: cover;
     /* opacity: 0.6; */
     /* background-color: #FF0000; */
+}
+
+.bulb {
+    background: url(../images/lightbulb-fill.svg);
+    background-size: 16px 16px;
+    display: block;
 }
 
 a:hover {

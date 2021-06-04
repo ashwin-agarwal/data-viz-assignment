@@ -17,7 +17,7 @@ const BUBBLE_PLOT = "#bubble_plot",
     CIRCULAR_BARPLOT = "#circular_barplot",
     LINE_CHART = "#line_chart";
 
-let sliderChange;
+let sliderChange, mouseposition = {};
 
 $(document).ready(function() {
     $(".btn-fullscreen").click(function() {
@@ -137,13 +137,13 @@ $(document).ready(function() {
             setTimeout(function() {
                 createCircularBarPlot(circular_bar_plot_data);
                 createLineChart(line_chart_data);
-            }, 10);
 
-            $('[class^="circular_barplot_"]:not(text)').click(function() {
-                $('#circular_barplot .highlight').removeClass("highlight");
-                $('.' + $(this).attr("class").split(' ')[0]).addClass("highlight");
-                createLineChart(line_chart_data);
-            });
+                $('[class^="circular_barplot_"]:not(text)').click(function() {
+                    $('#circular_barplot .highlight').removeClass("highlight");
+                    $('.' + $(this).attr("class").split(' ')[0]).addClass("highlight");
+                    createLineChart(line_chart_data);
+                });
+            }, 10);
         }
 
         $('input[name="country_select"]').click(function() {
@@ -484,8 +484,8 @@ $(document).ready(function() {
                     }
                 })
                 .css({
-                    "left": this.getBoundingClientRect().x,
-                    "top": $(window).scrollTop() + this.getBoundingClientRect().y - 100,
+                    "left": mouseposition.x - 100,
+                    "top": mouseposition.y - 150,
                     "opacity": 1,
                     "display": "block"
                 });
@@ -494,8 +494,8 @@ $(document).ready(function() {
         let barplotMouseMove = function(d) {
             $('div.tooltip')
                 .css({
-                    "left": this.getBoundingClientRect().x,
-                    "top": $(window).scrollTop() + this.getBoundingClientRect().y - 100
+                    "left": mouseposition.x - 100,
+                    "top": mouseposition.y - 150
                 });
         }
 
@@ -980,8 +980,8 @@ $(document).ready(function() {
 
             $('div.tooltip').html("<strong>Country:</strong> " + $(this).attr('title'))
                 .css({
-                    "left": d3.mouse(this)[0] + $(plot_id).offset().left + 10,
-                    "top": d3.mouse(this)[1] + $(plot_id).offset().top + 10,
+                    "left": mouseposition.x - 120,
+                    "top": mouseposition.y - 80,
                     "opacity": 1,
                     "display": "block"
                 });
@@ -998,8 +998,8 @@ $(document).ready(function() {
         var bubbleMapMouseMove = function(d) {
             $('div.tooltip')
                 .css({
-                    "left": d3.mouse(this)[0] + $(plot_id).offset().left + 10,
-                    "top": d3.mouse(this)[1] + $(plot_id).offset().top + 10,
+                    "left": mouseposition.x - 120,
+                    "top": mouseposition.y - 80,
                 });
         }
 
@@ -1055,6 +1055,7 @@ $(document).ready(function() {
             .attr("text", d => d.country_name)
             .attr("data-value", d => d.value)
             .on('mouseover', bubbleMapMouseOver)
+            .on('mousemove', bubbleMapMouseMove)
             .on('mouseout', bubbleMapMouseOut);
 
         // Add legend: circles
@@ -1189,7 +1190,25 @@ $(document).ready(function() {
                     .attr("transform", function(d) {
                         return "translate(" + [d.x, d.y] + ")rotate(" + d.rotate + ")";
                     })
-                    .text(function(d) { return d.text; });
+                    .text(function(d) { return d.text; })
+                    .on("mouseover", function(d) {
+                        $('div.tooltip').html("<strong><div class='text-center'>" + d.text + "</div>")
+                            .css({
+                                "left": mouseposition.x - 100,
+                                "top": mouseposition.y - 80,
+                                "opacity": 1,
+                                "display": "block"
+                            });
+                    })
+                    .on("mouseout", function() {
+                        $('div.tooltip').css({ "opacity": 0, "display": "none" });
+                    })
+                    .on("mousemove", function() {
+                        $('div.tooltip').css({
+                            "left": mouseposition.x - 100,
+                            "top": mouseposition.y - 80
+                        });
+                    });
             })
             .start();
 
@@ -1247,7 +1266,25 @@ $(document).ready(function() {
             .attr('fill', function(d) {
                 return color[d.index];
             })
-            .attr('d', arc);
+            .attr('d', arc)
+            .on("mouseover", function(d) {
+                $('div.tooltip').html("<strong>" + $('.doughnut_center').text() + "<br/></strong><strong>" + d.data.key + ":</strong> " + d.data.value + "%")
+                    .css({
+                        "left": mouseposition.x - 100,
+                        "top": mouseposition.y - 100,
+                        "opacity": 1,
+                        "display": "block"
+                    });
+            })
+            .on("mouseout", function() {
+                $('div.tooltip').css({ "opacity": 0, "display": "none" });
+            })
+            .on("mousemove", function() {
+                $('div.tooltip').css({
+                    "left": mouseposition.x - 100,
+                    "top": mouseposition.y - 100
+                });
+            });
 
         svg
             .selectAll('allPolylines')
@@ -1300,4 +1337,9 @@ $(document).ready(function() {
     });
 
     $("a.nav-link[href='" + window.location.hash + "']").addClass('active');
+
+    $(document).mousemove(function(event) {
+        mouseposition.x = event.pageX;
+        mouseposition.y = event.pageY;
+    });
 });
