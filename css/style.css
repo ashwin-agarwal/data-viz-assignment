@@ -169,11 +169,20 @@ a:hover {
 #by-engagement circle:hover,
 #by-engagement circle.hovered,
 #circular_barplot path:hover,
-#circular_barplot path.hovered,
-#circular_barplot .highlight:not(text) {
+#circular_barplot path.hovered {
     stroke: black;
     opacity: 1;
     cursor: pointer;
+}
+
+#circular_barplot .highlight:not(text) {
+    stroke-width: 4;
+    stroke: black;
+    cursor: pointer;
+}
+
+#circular_barplot .highlight {
+    opacity: 1;
 }
 
 #stacked_barchart rect:hover {
