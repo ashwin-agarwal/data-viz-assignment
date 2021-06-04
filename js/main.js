@@ -17,9 +17,44 @@ const BUBBLE_PLOT = "#bubble_plot",
     CIRCULAR_BARPLOT = "#circular_barplot",
     LINE_CHART = "#line_chart";
 
+const cat_colors = {
+    "Entertainment": "#1f77b4",
+    "Music": "#ff7f0e",
+    "People & Blogs": "#2ca02c",
+    "Sports": "#d62728",
+    "Gaming": "#9467bd",
+    "Comedy": "#8c564b",
+    "News & Politics": "#e377c2",
+    "Howto & Style": "#7f7f7f",
+    "Film & Animation": "#bcbd22",
+    "Autos & Vehicles": "#17becf",
+    "Science & Technology": "#a6cee3",
+    "Pets & Animals": "#1f78b4",
+    "Education": "#b2df8a",
+    "Travel & Events": "#33a02c",
+    "Nonprofits & Activism": "#fb9a99",
+    "Others": "#ffff99"
+
+};
+
+const country_colors = {
+    "Brazil": "#a6cee3",
+    "Canada": "#1f78b4",
+    "France": "#33a02c",
+    "Germany": "#b2df8a",
+    "India": "#e31a1c",
+    "Japan": "#fdbf6f",
+    "Mexico": "#cab2d6",
+    "Russia": "#6a3d9a",
+    "S Korea": "#ff7f00",
+    "UK": "#fb9a99",
+    "USA": "#ffff99"
+};
+
 let sliderChange, mouseposition = {};
 
 $(document).ready(function() {
+
     $(".btn-fullscreen").click(function() {
         // https://stackoverflow.com/questions/13303151/getting-fullscreen-mode-to-my-browser-using-jquery
         if (!document.fullscreenElement && // alternative standard method
@@ -62,7 +97,7 @@ $(document).ready(function() {
 
     let data_ready = function(_, geo_data, bubble_map_data, doughnut_data, wordcloud_data, bubble_plot_data, stacked_bar_plot_data, circular_bar_plot_data, line_chart_data) {
         delete(bubble_map_data['columns']);
-        let country_colors = createBubbleMap(geo_data, bubble_map_data);
+        createBubbleMap(geo_data, bubble_map_data);
 
         delete(doughnut_data['columns']);
         createDoughnut(doughnut_data);
@@ -71,7 +106,7 @@ $(document).ready(function() {
         createWordCloud(wordcloud_data);
 
         delete(bubble_plot_data['columns']);
-        createBubblePlot(bubble_plot_data, country_colors);
+        createBubblePlot(bubble_plot_data);
 
         delete(stacked_bar_plot_data['columns']);
         createStackedBarchart(stacked_bar_plot_data, "Overall");
@@ -230,24 +265,7 @@ $(document).ready(function() {
 
     let createLineChart = function(data, plot_id = LINE_CHART) {
         let margin = { top: 60, left: 100 },
-            sort_col = $('input[name="top_channels"]:checked').val(),
-            color = {
-                "Entertainment": "#1f77b4",
-                "Music": "#ff7f0e",
-                "People & Blogs": "#2ca02c",
-                "Sports": "#d62728",
-                "Gaming": "#9467bd",
-                "Comedy": "#8c564b",
-                "News & Politics": "#e377c2",
-                "Howto & Style": "#7f7f7f",
-                "Film & Animation": "#bcbd22",
-                "Autos & Vehicles": "#17becf",
-                "Science & Technology": "#a6cee3",
-                "Pets & Animals": "#1f78b4",
-                "Education": "#b2df8a",
-                "Travel & Events": "#33a02c",
-                "Nonprofits & Activism": "#fb9a99"
-            };
+            sort_col = $('input[name="top_channels"]:checked').val();
 
         $(plot_id).empty();
 
@@ -347,7 +365,7 @@ $(document).ready(function() {
             .attr("fill", "none")
             .attr("stroke-width", 2.5)
             .attr("stroke", function(d) {
-                return color[d.key];
+                return cat_colors[d.key];
             })
             .attr("d", function(d) {
                 return d3.line()
@@ -376,7 +394,7 @@ $(document).ready(function() {
             .attr("cy", yLegend)
             .attr("cx", function(d, i) { return 6 + (i * 180); })
             .attr("r", 7)
-            .style("fill", d => color[d]);
+            .style("fill", d => cat_colors[d]);
 
         svg.selectAll(plot_id)
             .data(groups)
@@ -385,7 +403,7 @@ $(document).ready(function() {
             .attr("y", yLegend)
             .attr("x", function(d, i) { return 16 + (i * 180); })
             .text(function(d) { return d.charAt().toUpperCase() + d.slice(1) })
-            .style("fill", (d) => color[d])
+            .style("fill", (d) => cat_colors[d])
             .attr("text-anchor", "center")
             .style("alignment-baseline", "middle");
 
@@ -741,7 +759,7 @@ $(document).ready(function() {
 
     }
 
-    let createBubblePlot = function(data, country_colors, plot_id = BUBBLE_PLOT) {
+    let createBubblePlot = function(data, plot_id = BUBBLE_PLOT) {
 
         let margin = { top: 50, right: 20, bottom: 30, left: 100 };
         let filtered_data = [];
@@ -958,8 +976,6 @@ $(document).ready(function() {
             .scale(160) // This is like the zoom
             .translate([width / 2, height / 2]);
 
-        var color = d3.schemePaired;
-        // var color = d3.scaleOrdinal(d3.schemePaired);
 
         // Add a scale for bubble size
         var valueExtent = d3.extent(counts_by_region, function(d) {
@@ -1003,10 +1019,7 @@ $(document).ready(function() {
                 });
         }
 
-        // Draw the map
-        let color_pallete_no = {};
-        let i = -1;
-
+        // Draw the map    
         svg.append("g")
             .selectAll("path")
             .data(dataGeo.features)
@@ -1014,9 +1027,7 @@ $(document).ready(function() {
             .append("path")
             // .attr("fill", "#fff")
             .attr("fill", function(d) {
-                i += 1;
-                color_pallete_no[d.properties.name] = color[i];
-                return color[i];
+                return country_colors[d.properties.name];
             })
             .attr("d", d3.geoPath()
                 .projection(projection)
@@ -1049,7 +1060,7 @@ $(document).ready(function() {
                 return size(+d.value);
             })
             .style("fill", function(d) {
-                return color_pallete_no[d.country_name];
+                return country_colors[d.country_name];
             })
             .attr("title", d => d.country_name + "<br/><strong>Total videos:</strong> " + formatN(d.value))
             .attr("text", d => d.country_name)
@@ -1123,7 +1134,7 @@ $(document).ready(function() {
             .attr("cy", function(d, i) { return yLegend + (25 * Math.floor(i / 6)); })
             .attr("cx", function(d, i) { return xLegend + ((i % 6) * (width / 11)) % width })
             .attr("r", 7)
-            .style("fill", function(d) { return color_pallete_no[d.country_name]; })
+            .style("fill", function(d) { return country_colors[d.country_name]; })
             .attr("title", d => d.country_name + "<br/>Click map to drill-down")
             .on("mouseover", bubbleMapMouseOver)
             .on("mouseout", bubbleMapMouseOut);
@@ -1136,13 +1147,11 @@ $(document).ready(function() {
             .attr("id", d => "legend_text-" + d.country_name.replace(" ", "_").toLowerCase())
             .attr("y", function(d, i) { return yLegend + (25 * Math.floor(i / 6)) + 2; })
             .attr("x", function(d, i) { return xLegend + 14 + ((i % 6) * (width / 11)) % width })
-            .style("fill", function(d) { return color_pallete_no[d.country_name] })
+            .style("fill", function(d) { return country_colors[d.country_name] })
             .text(function(d) { return d.country_name })
             .style("alignment-baseline", "middle");
 
         showPlot(plot_id);
-
-        return color_pallete_no;
     }
 
     let createWordCloud = function(data, filter = 'Overall', plot_id = WORDCLOUD) {
@@ -1236,9 +1245,6 @@ $(document).ready(function() {
             height = $(plot_id).parent().height(),
             radius = (Math.min(width, height) / 2) * 0.5;
 
-        // var color = d3.scaleOrdinal(d3.schemeCategory10);
-        var color = (d3.schemeCategory10 + ',' + d3.schemePaired).split(',');
-
         svg.attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
         var pie = d3.pie()
@@ -1264,7 +1270,7 @@ $(document).ready(function() {
             .append('path')
             .attr('text', d => d.data.key)
             .attr('fill', function(d) {
-                return color[d.index];
+                return cat_colors[d.data.key];
             })
             .attr('d', arc)
             .on("mouseover", function(d) {
@@ -1318,7 +1324,7 @@ $(document).ready(function() {
                 return (midangle < Math.PI ? 'start' : 'end')
             })
             .style('fill', function(d) {
-                return color[d.index];
+                return cat_colors[d.data.key];
             });
 
         svg
