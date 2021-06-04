@@ -473,7 +473,7 @@ $(document).ready(function() {
         let barplotMouseOver = function(d) {
             $("." + $(this).attr("class")).toggleClass("hovered");
 
-            $('div.tooltip')
+            $('#by-channel div.tooltip')
                 .html(function() {
                     if (sort_col == "views") {
                         return "<strong>" + d.key + "</strong><br/><strong>Views:</strong> " + formatN(d.value.views) + " <br/><strong>Videos:</strong> " + d.value.videos;
@@ -490,7 +490,7 @@ $(document).ready(function() {
         }
 
         let barplotMouseMove = function(d) {
-            $('div.tooltip')
+            $('#by-channel div.tooltip')
                 .css({
                     "left": this.getBoundingClientRect().x,
                     "top": $(window).scrollTop() + this.getBoundingClientRect().y - 100
@@ -499,7 +499,7 @@ $(document).ready(function() {
 
         let barplotMouseOut = function() {
             $(plot_id + " .hovered").removeClass("hovered");
-            $('div.tooltip').css({ "opacity": 0, "display": "none" });
+            $('#by-channel div.tooltip').css({ "opacity": 0, "display": "none" });
         }
 
         // Add the bars
@@ -646,7 +646,7 @@ $(document).ready(function() {
 
         var stackedBarChartMouseOver = function(d) {
 
-            $('div.tooltip')
+            $('#by-engagement div.tooltip')
                 .html(function() {
                     return "<strong>" + d.data.category_title + "</strong><br/><strong>Views:</strong> " + formatN(d.data.views) + " <br/><strong>Engagement rate:</strong> " + d.data.engagement_rate + "%<br/><strong>Likes:</strong> " + d.data.likes + "%<br/><strong>Comments:</strong> " + d.data.comments + "%<br/><strong>Dislikes:</strong> " + d.data.dislikes + "%";
                 })
@@ -662,12 +662,12 @@ $(document).ready(function() {
 
         var stackedBarChartMouseOut = function() {
             // alert('b');
-            $('div.tooltip').css({ "opacity": 0, "display": "none" });
+            $('#by-engagement div.tooltip').css({ "opacity": 0, "display": "none" });
             // $("#bubble_plot [text='" + $(this).attr("text") + "']").toggleClass("hovered");
         };
 
         var stackedBarChartMouseMove = function(d) {
-            $('div.tooltip')
+            $('#by-engagement div.tooltip')
                 .css({
                     "left": d3.mouse(this)[0] + $(plot_id).offset().left + 100,
                     "top": d3.mouse(this)[1] + $(plot_id).offset().top - 140
@@ -816,7 +816,7 @@ $(document).ready(function() {
 
         // -2- Create 3 functions to show / update (when mouse move but stay on same circle) / hide the tooltip
         var bubblePlotMouseOver = function(d) {
-            $('div.tooltip')
+            $('#by-engagement div.tooltip')
                 .html("<strong>" + d.key + "</strong><br/><strong>Views:</strong> " + formatN(d.value.views) + "<br/><strong>Likes:</strong> " + formatN(d.value.likes) + "<br/><strong>Dislikes:</strong> " + formatN(d.value.dislikes) + "<br/><strong>Comments:</strong> " + formatN(d.value.comments) + "<br/>Click to drill-down.")
                 .css({
                     "left": d3.mouse(this)[0] + $(plot_id).offset().left + 130,
@@ -828,12 +828,12 @@ $(document).ready(function() {
             $("#bubble_plot [text='" + $(this).attr("text") + "']").toggleClass("hovered");
         }
         var bubblePlotMouseOut = function(d) {
-            $('div.tooltip').css({ "opacity": 0, "display": "none" });
+            $('#by-engagement div.tooltip').css({ "opacity": 0, "display": "none" });
             $("#bubble_plot [text='" + $(this).attr("text") + "']").toggleClass("hovered");
         }
 
         var bubblePlotMouseMove = function(d) {
-            $('div.tooltip')
+            $('#by-engagement div.tooltip')
                 .css({
                     "left": d3.mouse(this)[0] + $(plot_id).offset().left + 130,
                     "top": d3.mouse(this)[1] + $(plot_id).offset().top + 10
@@ -976,7 +976,7 @@ $(document).ready(function() {
             $(plot_id + " #legend_circle-" + $(this).attr('id').split('-')[1]).toggleClass('hovered');
             $(plot_id + " #legend_text-" + $(this).attr('id').split('-')[1]).toggleClass('hovered');
 
-            $('div.tooltip').html("<strong>Country:</strong> " + $(this).attr('title'))
+            $('#by-region div.tooltip').html("<strong>Country:</strong> " + $(this).attr('title'))
                 .css({
                     "left": d3.mouse(this)[0] + $(plot_id).offset().left + 10,
                     "top": d3.mouse(this)[1] + $(plot_id).offset().top + 10,
@@ -990,11 +990,11 @@ $(document).ready(function() {
             $('#circle-' + $(this).attr('id').split('-')[1]).toggleClass('hovered');
             $(plot_id + " #legend_circle-" + $(this).attr('id').split('-')[1]).toggleClass('hovered');
             $(plot_id + " #legend_text-" + $(this).attr('id').split('-')[1]).toggleClass('hovered');
-            $('div.tooltip').css({ "opacity": 0, "display": "none" });
+            $('#by-region div.tooltip').css({ "opacity": 0, "display": "none" });
         }
 
         var bubbleMapMouseMove = function(d) {
-            $('div.tooltip')
+            $('#by-region div.tooltip')
                 .css({
                     "left": d3.mouse(this)[0] + $(plot_id).offset().left + 10,
                     "top": d3.mouse(this)[1] + $(plot_id).offset().top + 10,
