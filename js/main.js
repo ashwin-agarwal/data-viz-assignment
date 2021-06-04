@@ -1374,7 +1374,7 @@ $(document).ready(function() {
 
         let modal_body = [`
         <ul>
-            <li>Russia is the only country that has "News & Politics" in the top three trending categories. All other countries have "Entertainment" and "Music" in the top three</li>
+            <li>Russia is the only country that has "News & Politics" in the top three trending categories. All other countries have "Entertainment" and "Music" in the top three.</li>
             <li>While comedy videos may not be high in number, the word cloud suggests that every country loves to laugh. We see that "Comedy" and "Funny" are the prominent keywords in the overall word cloud.</li>
             <li>There is equal number of trending videos for all 11 countries, which means that each country contributes equal data to the analysis and visualization.</li>
         </ul>`, `
