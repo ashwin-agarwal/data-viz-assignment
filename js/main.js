@@ -17,6 +17,7 @@ const BUBBLE_PLOT = "#bubble_plot",
     CIRCULAR_BARPLOT = "#circular_barplot",
     LINE_CHART = "#line_chart";
 
+let sliderChange;
 
 $(document).ready(function() {
     var observer = new IntersectionObserver(function(entries) {
@@ -51,10 +52,7 @@ $(document).ready(function() {
         createStackedBarchart(stacked_bar_plot_data, "Overall");
 
         delete(circular_bar_plot_data['columns']);
-        createCircularBarPlot(circular_bar_plot_data);
-
         delete(line_chart_data['columns']);
-        createLineChart(line_chart_data);
 
         $('#bubble_map path, #bubble_map circle[id^=circle-]').each(function(_, d) {
             $(this).click(function() {
@@ -110,6 +108,17 @@ $(document).ready(function() {
             createStackedBarchart(stacked_bar_plot_data, country_selected);
         });
 
+        let circularBarplotClick = function() {
+            createCircularBarPlot(circular_bar_plot_data);
+            createLineChart(line_chart_data);
+
+            $('[class^="circular_barplot_"]:not(text)').click(function() {
+                $('#circular_barplot .highlight').removeClass("highlight");
+                $('.' + $(this).attr("class").split(' ')[0]).addClass("highlight");
+                createLineChart(line_chart_data);
+            });
+        }
+
         $('input[name="country_select"]').click(function() {
             let not_checked = $('input[name="country_select"]:not(checked)'),
                 checked = $('input[name="country_select"]:checked'),
@@ -129,18 +138,25 @@ $(document).ready(function() {
                 }
 
             }
-            createCircularBarPlot(circular_bar_plot_data);
+            circularBarplotClick();
         });
 
-        $('input[name="top_channels"]').click(function() {
-            createCircularBarPlot(circular_bar_plot_data);
-        });
+        $('input[name="top_channels"]').click(circularBarplotClick);
 
-        $('#channelN').change(function() {
-            $("#channel_count").text($('#channelN').val());
-            createCircularBarPlot(circular_bar_plot_data);
-        });
+        $('#channelN').change(circularBarplotClick);
+
+        sliderChange = function(new_val) {
+            $("#channel_count").text(new_val);
+            circularBarplotClick();
+        }
+        circularBarplotClick();
+        setTimeout(function() {
+            $('.user_interaction *').fadeIn("slow");
+            $('.sort_radio').fadeIn("slow");
+        }, 1500);
+
     }
+
 
 
     d3.queue()
@@ -153,7 +169,6 @@ $(document).ready(function() {
         .defer(d3.csv, CIRCULAR_BARPLOT_PATH)
         .defer(d3.csv, LINE_CHART_PATH)
         .await(data_ready);
-
 
     let showPlot = function(id, effect = "fade") {
 
@@ -172,11 +187,11 @@ $(document).ready(function() {
 
     let formatN = function(n, decimal = 2) {
         n = parseInt(n);
-        if (n > 1e9) {
+        if (n >= 1e9) {
             return (n / 1e9).toFixed(decimal) + " B";
-        } else if (n > 1e6) {
+        } else if (n >= 1e6) {
             return (n / 1e6).toFixed(decimal) + " M";
-        } else if (n > 1e3) {
+        } else if (n >= 1e3) {
             return (n / 1e3).toFixed(decimal) + " K";
         } else {
             return n.toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
@@ -184,11 +199,171 @@ $(document).ready(function() {
     }
 
     let createLineChart = function(data, plot_id = LINE_CHART) {
-        console.log(data);
+        let margin = { top: 60, left: 100 },
+            sort_col = $('input[name="top_channels"]:checked').val(),
+            color = {
+                "Entertainment": "#1f77b4",
+                "Music": "#ff7f0e",
+                "People & Blogs": "#2ca02c",
+                "Sports": "#d62728",
+                "Gaming": "#9467bd",
+                "Comedy": "#8c564b",
+                "News & Politics": "#e377c2",
+                "Howto & Style": "#7f7f7f",
+                "Film & Animation": "#bcbd22",
+                "Autos & Vehicles": "#17becf",
+                "Science & Technology": "#a6cee3",
+                "Pets & Animals": "#1f78b4",
+                "Education": "#b2df8a",
+                "Travel & Events": "#33a02c",
+                "Nonprofits & Activism": "#fb9a99"
+            };
+
+        $(plot_id).empty();
+
+        var width = ($(plot_id).parent().width()) * 0.8,
+            height = ($(plot_id).parent().height()) * 0.75,
+            svg = d3.select(plot_id)
+            .append("g")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        if ($('#circular_barplot .highlight').length == 0) {
+            $('.circular_barplot_0').addClass("highlight");
+        }
+
+        let channel_name = $('#circular_barplot text.highlight').attr("title");
+
+        let filter = [];
+        $('input[name="country_select"]:checked').each(function(d) {
+            filter.push($(this).val());
+        });
+
+        if (filter.length == 0) {
+            svg.append("text").attr("x", margin.left).attr("y", (height + margin.top) / 2).text("Please select at least one country").attr("fill", "rgb(180, 180, 180)");
+            return;
+        }
+
+
+        data = data.filter(function(d) {
+            if ($.inArray(d.country_name, filter) >= 0 && d.channel_title === channel_name) {
+                return d;
+            }
+        });
+
+        data = d3.nest()
+            .key(function(d) { return [d.category_title, d.trending_date]; })
+            .rollup(function(v) {
+                return {
+                    category_title: v[0].category_title,
+                    trending_date: v[0].trending_date,
+                    videos: d3.sum(v, function(d) { return d.videos; }),
+                    views: d3.sum(v, function(d) { return d.views; })
+                };
+            })
+            .entries(data);
+
+
+        let filtered_data = [];
+        $(data).each(function(_, d) {
+            filtered_data.push({
+                category_title: d.value.category_title,
+                x_axis: d3.timeParse("%Y-%m-%d")(d.value['trending_date']),
+                y_axis: d.value[sort_col]
+            });
+        })
+
+        data = filtered_data;
+
+        // Add X axis-- > it is a date format
+        var xScale = d3.scaleTime()
+            .domain(d3.extent(data, d => d.x_axis)).range([0, width]);
+
+
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .attr("class", "axis")
+            .call(d3.axisBottom(xScale).tickFormat(function(d) {
+                return d3.timeFormat("%d")(d).substring(0, 3) + "-" + d3.timeFormat("%B")(d).substring(0, 3) + "-" + d3.timeFormat("%Y")(d).substring(2, 4);
+            }).ticks(5))
+            .selectAll("text")
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", "rotate(-65)");
+
+        // Add Y axis
+        var yScale = d3.scaleLinear()
+            .domain([0, d3.max(data, d => +d.y_axis)])
+            .range([height, 0]);
+
+        svg.append("g")
+            .attr("class", "axis")
+            .call(d3.axisLeft(yScale).tickFormat(function(d) {
+                return formatN(d, 1);
+            }).ticks(5));
+
+        var groups = Array.from(new Set(data.map(function(d) { return d.category_title }))) // list of group names        
+
+        data = d3.nest().key(d => d.category_title).entries(data);
+
+        // Draw the line
+        svg.selectAll(".line")
+            .append("g")
+            .data(data)
+            .enter()
+            .append("path")
+            .attr("fill", "none")
+            .attr("stroke-width", 2.5)
+            .attr("stroke", function(d) {
+                return color[d.key];
+            })
+            .attr("d", function(d) {
+                return d3.line()
+                    .x(d => xScale(d.x_axis))
+                    .y(d => yScale(d.y_axis)).curve(d3.curveBasis)
+                    (d.values.sort(function(a, b) {
+                        return b.x_axis - a.x_axis;
+                    }))
+            });
+
+        svg.append("text")
+            .attr("text-anchor", "start")
+            .attr("x", 0)
+            .attr("y", -35)
+            .style("font-size", "22px")
+            .style("fill", "#fff")
+            .text(channel_name);
+
+
+        //groups legend
+        var yLegend = -14;
+        svg.selectAll(plot_id)
+            .data(groups)
+            .enter()
+            .append("circle")
+            .attr("cy", yLegend)
+            .attr("cx", function(d, i) { return 6 + (i * 180); })
+            .attr("r", 7)
+            .style("fill", d => color[d]);
+
+        svg.selectAll(plot_id)
+            .data(groups)
+            .enter()
+            .append("text")
+            .attr("y", yLegend)
+            .attr("x", function(d, i) { return 16 + (i * 180); })
+            .text(function(d) { return d.charAt().toUpperCase() + d.slice(1) })
+            .style("fill", (d) => color[d])
+            .attr("text-anchor", "center")
+            .style("alignment-baseline", "middle");
+
         showPlot(plot_id);
     }
 
     let createCircularBarPlot = function(data, plot_id = CIRCULAR_BARPLOT) {
+
         let sort_col = $('input[name="top_channels"]:checked').val();
         let other_col = (sort_col == "views") ? "videos" : "views";
         var color = (d3.schemeCategory10 + ',' + d3.schemePaired + ',' + d3.schemeDark2 + ',' + d3.schemeTableau10 + ',' + d3.schemeAccent + ',' + d3.schemeSet2 + ' ' + d3.schemeSet3 + ',' + d3.schemePastel1 + ',' + d3.schemePastel2 + ' ' + d3.schemeSet3 + ',' + d3.schemePastel1 + ',' + d3.schemePastel2).split(',');
@@ -208,7 +383,7 @@ $(document).ready(function() {
             .append("g")
             .attr("width", width)
             .attr("height", height)
-            .attr("transform", "translate(" + (width / 2) + "," + ((height + 50) / 2) + ")");
+            .attr("transform", "translate(" + (width / 2) + "," + ((height + 30) / 2) + ")");
 
         let filter = [];
 
@@ -227,8 +402,7 @@ $(document).ready(function() {
             .rollup(function(v) {
                 return {
                     videos: d3.sum(v, function(d) { return d.videos; }),
-                    views: d3.sum(v, function(d) { return d.views; }),
-                    country: d3.map(v, function(d) { return d.country_name }).keys()
+                    views: d3.sum(v, function(d) { return d.views; })
                 };
             })
             .entries(data)
@@ -239,6 +413,11 @@ $(document).ready(function() {
                 return +b.value[sort_col] - +a.value[sort_col];
             }).slice(0, $('#channelN').val());
 
+
+        if (data.length == 0) {
+            svg.append("text").attr("x", -120).attr("y", 0).text("Please select at least one country").attr("fill", "rgb(180, 180, 180)");
+            return;
+        }
 
         // X scale: common for 2 data series
         var x = d3.scaleBand()
@@ -359,11 +538,12 @@ $(document).ready(function() {
                 return "circular_barplot_" + i;
             })
             .text(function(d) {
-                if (d.key.length > 18) {
-                    return (d.key.substring(0, 16) + "...");
+                if (d.key.length > 16) {
+                    return (d.key.substring(0, 13) + "...");
                 }
                 return d.key;
             })
+            .attr("title", d => d.key)
             .attr("transform", function(d) { return (x(d.key) + x.bandwidth() / 2 + Math.PI) % (2 * Math.PI) < Math.PI ? "rotate(180)" : "rotate(0)"; })
             .style("font-size", "12px")
             .attr("alignment-baseline", "middle")
@@ -380,7 +560,7 @@ $(document).ready(function() {
 
     let createStackedBarchart = function(data, filter = "Overall", plot_id = STACKED_BARCHART) {
 
-        let margin = { top: 36, right: 60, bottom: 30, left: 210 };
+        let margin = { top: 26, right: 60, bottom: 30, left: 210 };
         let sort_col = $('input[name="sort_radio"]:checked').val();
 
         data = data.filter(d => d.country_name == filter);
@@ -533,7 +713,7 @@ $(document).ready(function() {
 
     let createBubblePlot = function(data, country_colors, plot_id = BUBBLE_PLOT) {
 
-        let margin = { top: 60, right: 20, bottom: 30, left: 100 };
+        let margin = { top: 50, right: 20, bottom: 30, left: 100 };
         let filtered_data = [];
 
         data = $(data).each(function(_, d) {
@@ -846,7 +1026,7 @@ $(document).ready(function() {
             .on('mouseout', bubbleMapMouseOut);
 
         // Add legend: circles
-        var valuesToShow = [45000, 90000],
+        var valuesToShow = [43000, 47000],
             xCircle = 70,
             xLabel = xCircle + 60,
             yHeight = height - 30;
@@ -956,7 +1136,7 @@ $(document).ready(function() {
             .domain([0, d3.max(data, function(d) {
                 return d.size;
             })])
-            .range([1, 20]);
+            .range([5, 25]);
 
         d3.layout.cloud().size([width, height])
             .timeInterval(20)
@@ -1078,8 +1258,6 @@ $(document).ready(function() {
             .attr('y', 15)
             .text('Overall');
 
-        showPlot(plot_id, "slide");
+        showPlot(plot_id);
     }
-
-    $("#channel_count").text($('#channelN').val());
 });

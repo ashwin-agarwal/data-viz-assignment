@@ -17,14 +17,47 @@
  * Base structure
  */
 
-body {
+#home,
+#by-region,
+#by-engagement,
+#by-channel,
+#references {
+    padding-top: 84px;
+    height: 100vh;
+}
+
+#home,
+#by-region,
+#by-engagement,
+#by-channel,
+#references {
     text-shadow: 0 .05rem .1rem rgba(0, 0, 0, .5);
     box-shadow: inset 0 0 5rem rgba(0, 0, 0, .5);
     color: #fff;
 }
 
-.cover-container {
-    max-width: 90%;
+#by-region,
+#by-channel {
+    /* background-color: #282828; */
+    background-color: #1A1A1D;
+}
+
+#by-engagement,
+#references {
+    /* background-color: #757575; */
+    background-color: #19181A;
+    /* background-color: #1F2833; */
+    /* background-color: #0B0C10; */
+}
+
+#home div {
+    position: absolute;
+    padding-top: 84px;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    width: 100%;
 }
 
 
@@ -32,17 +65,31 @@ body {
  * Header
  */
 
+header {
+    opacity: 0.85;
+    border-bottom: 1px solid black;
+    height: 85px;
+}
+
+header h3 {
+    color: black;
+}
+
 .nav-masthead .nav-link {
     padding: .25rem 0;
     font-weight: 700;
-    color: #fff;
     background-color: transparent;
     border-bottom: .25rem solid transparent;
+    color: black;
 }
 
-.nav-masthead .nav-link:hover,
-.nav-masthead .nav-link:focus {
-    border-bottom-color: rgba(255, 255, 255, .25);
+.nav-masthead .nav-link:not(.active):hover,
+.nav-masthead .nav-link:not(.active):focus {
+    color: #FF0000;
+}
+
+.nav-masthead .nav-link.active:hover,
+.nav-masthead .nav-link.active:focus {
     color: #FF0000;
 }
 
@@ -51,8 +98,8 @@ body {
 }
 
 .nav-masthead .active {
-    color: #fff;
-    border-bottom-color: #fff;
+    border-bottom-color: #FF0000;
+    color: #FF0000;
 }
 
 
@@ -82,4 +129,177 @@ body {
 
 a:hover {
     color: #FF0000;
+}
+
+.faded {
+    /*  Class that contains property of a faded element. */
+    /* stroke-opacity: 0.2; */
+    opacity: 0.1 !important;
+    /* fill-opacity: 0.4; */
+}
+
+.highlight {
+    opacity: 1 !important;
+}
+
+#bubble_map,
+#doughnut,
+#wordcloud,
+#bubble_plot,
+#stacked_barchart,
+#circular_barplot,
+#line_chart {
+    display: none;
+}
+
+#by-region path,
+#by-channel path {
+    opacity: 0.7;
+}
+
+#stacked_barchart rect,
+#by-engagement circle {
+    opacity: 0.7;
+    stroke: white;
+}
+
+#by-region path:hover,
+#by-region path.hovered,
+#stacked_barchart rect:hover,
+#by-engagement circle:hover,
+#by-engagement circle.hovered,
+#circular_barplot path:hover,
+#circular_barplot path.hovered,
+#circular_barplot .highlight:not(text) {
+    stroke: black;
+    opacity: 1;
+    cursor: pointer;
+}
+
+#stacked_barchart rect:hover {
+    cursor: default;
+}
+
+#bubble_map circle {
+    opacity: 1;
+    stroke: white;
+}
+
+#bubble_map circle:hover,
+#bubble_map circle.hovered {
+    opacity: 0.7;
+    stroke: black;
+    cursor: pointer;
+}
+
+#bubble_map text.hovered,
+#bubble_map text:hover,
+#circular_barplot text:hover,
+#circular_barplot text.hovered {
+    text-decoration: underline;
+    cursor: default;
+}
+
+.tooltip {
+    width: 200px;
+    border: solid;
+    border-width: 2px;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+#doughnut path:hover {
+    stroke: black;
+    stroke-width: 2px;
+    opacity: 1;
+    cursor: default;
+}
+
+#doughnut text:not(.doughnut_center) {
+    font-size: 12px;
+    cursor: default;
+}
+
+polyline {
+    stroke: #fff;
+    fill: none;
+    stroke-width: 1;
+}
+
+text.doughnut_center {
+    font-size: 1.3em;
+    fill: #fff;
+    text-anchor: middle;
+    cursor: default;
+}
+
+#wordcloud text {
+    opacity: 0.8;
+}
+
+#wordcloud text:hover,
+#wordcloud text.hovered,
+#bubble_plot text:hover.legend,
+#bubble_plot text.hovered {
+    opacity: 1;
+    text-decoration: underline;
+    cursor: default;
+}
+
+#line_chart path:hover {
+    opacity: 1;
+    cursor: default;
+    stroke-width: 3;
+}
+
+#by-engagement line,
+#by-engagement path,
+#line_chart .domain {
+    stroke: rgb(180, 180, 180);
+    stroke-width: 3.5px;
+}
+
+#circular_barplot path {
+    stroke: #fff;
+    stroke-opacity: 0.7;
+    stroke-width: 0.1rem;
+}
+
+#by-engagement text,
+#line_chart text {
+    fill: rgb(180, 180, 180);
+    font-size: 16px;
+}
+
+#bubble_plot text.legend {
+    font-size: 1rem;
+}
+
+#by-engagement .sort_radio {
+    color: rgb(180, 180, 180);
+    margin-right: 30px;
+    margin-left: 180px;
+    font-size: 1em;
+}
+
+#by-engagement .country_select {
+    color: rgb(180, 180, 180);
+    margin-left: 100px;
+}
+
+#by-channel text {
+    font-weight: 500;
+}
+
+#channelN .slider-selection {
+    background: #BABABA;
+}
+
+.user_interaction {
+    color: rgb(180, 180, 180);
+}
+
+.user_interaction *,
+.sort_radio {
+    display: none;
 }
