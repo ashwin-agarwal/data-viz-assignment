@@ -771,7 +771,8 @@ $(document).ready(function() {
                     comments: Math.round(d.comments),
                     likes: Math.round(d.likes),
                     dislikes: Math.round(d.dislikes),
-                    views: Math.round(d.views)
+                    views: Math.round(d.views),
+                    likes_dislikes: Math.round(d.likes_dislikes)
                 }
             });
         });
@@ -788,8 +789,8 @@ $(document).ready(function() {
 
         // Add X axis
         var x = d3.scaleLinear()
-            .domain([35e3, d3.max(data, function(d) {
-                return d.value.likes + 2e4;
+            .domain([36e3, d3.max(data, function(d) {
+                return d.value.likes_dislikes + 2e4;
             })])
             .range([0, width]);
 
@@ -806,11 +807,11 @@ $(document).ready(function() {
             .attr("y", height + 45)
             .style("font-size", "18px")
             .style("fill", "rgb(180, 180, 180)")
-            .text("Average Likes");
+            .text("Average Likes + Dislikes");
 
         // Add Y axis
         var y = d3.scaleLinear()
-            .domain([35e2, d3.max(data, function(d) {
+            .domain([36e2, d3.max(data, function(d) {
                 return d.value.comments + 2e3;
             })])
             .range([height, 0]);
@@ -822,7 +823,7 @@ $(document).ready(function() {
         svg.append("text")
             .attr("x", 10)
             .attr("y", 0)
-            .html("Average Comments (billions)")
+            .html("Average Comments")
             .style("font-size", "18px")
             .attr("text-anchor", "start");
 
@@ -832,7 +833,7 @@ $(document).ready(function() {
             .domain([1, d3.max(data, function(d) {
                 return d.value.views;
             })])
-            .range([2, 40]);
+            .range([10, 38]);
 
         // -2- Create 3 functions to show / update (when mouse move but stay on same circle) / hide the tooltip
         var bubblePlotMouseOver = function(d) {
@@ -862,14 +863,16 @@ $(document).ready(function() {
 
         svg.append("g")
             .selectAll("dot")
-            .data(data)
+            .data(data.sort(function(a, b) {
+                return d3.ascending(b.key, a.key);
+            }))
             .enter()
             .append("circle")
             .attr("class", "bubble")
-            .attr("cx", function(d) { return x(d.value.likes); })
+            .attr("cx", function(d) { return x(d.value.likes_dislikes); })
             .attr("cy", function(d) { return y(d.value.comments); })
             .attr("r", function(d) { return z(d.value.views); })
-            .attr("title", function(d) { return d.value.likes + " " + d.value.comments })
+            .attr("title", function(d) { return d.value.likes_dislikes + " " + d.value.comments })
             .attr("text", function(d) { return d.key })
             .style("fill", function(d) { return country_colors[d.key]; })
             // -3- Trigger the functions
@@ -879,7 +882,7 @@ $(document).ready(function() {
 
 
         // Add legend: circles
-        var valuesToShow = [5e5, 20e5, 40e5],
+        var valuesToShow = [5e5, 30e5],
             xCircle = width - 85,
             xLabel = xCircle + 60,
             yHeight = height - 80;
@@ -931,7 +934,9 @@ $(document).ready(function() {
         //country legend
         var yLegend = height + 70;
         svg.selectAll(plot_id)
-            .data(data)
+            .data(data.sort(function(a, b) {
+                return d3.ascending(a.key, b.key);
+            }))
             .enter()
             .append("circle")
             .attr("class", "legend")
