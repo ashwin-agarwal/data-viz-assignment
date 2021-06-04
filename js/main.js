@@ -20,7 +20,7 @@ const BUBBLE_PLOT = "#bubble_plot",
 let sliderChange;
 
 $(document).ready(function() {
-    $("#btn-fullscreen").click(function() {
+    $(".btn-fullscreen").click(function() {
         // https://stackoverflow.com/questions/13303151/getting-fullscreen-mode-to-my-browser-using-jquery
         if (!document.fullscreenElement && // alternative standard method
             !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) { // current working methods
@@ -59,8 +59,6 @@ $(document).ready(function() {
     $('main > div').each(function() {
         observer.observe(this);
     });
-
-    $("a.nav-link[href='" + window.location.hash + "']").addClass('active');
 
     let data_ready = function(_, geo_data, bubble_map_data, doughnut_data, wordcloud_data, bubble_plot_data, stacked_bar_plot_data, circular_bar_plot_data, line_chart_data) {
         delete(bubble_map_data['columns']);
@@ -1292,5 +1290,12 @@ $(document).ready(function() {
 
         showPlot(plot_id);
     }
-    alert("For best experience, please click the 'Toggle Fullscreen' button and view the page in full screen");
+
+    $("#pageLoadModal").modal('show');
+
+    $('#pageLoadModal button').click(function() {
+        $("#pageLoadModal").modal('hide');
+    });
+
+    $("a.nav-link[href='" + window.location.hash + "']").addClass('active');
 });
