@@ -170,8 +170,8 @@ a:hover {
 #by-region path:hover,
 #by-region path.hovered,
 #stacked_barchart rect:hover,
-#by-engagement circle:hover,
-#by-engagement circle.hovered,
+#bubble_plot circle:hover,
+#bubble_plot circle.hovered,
 #circular_barplot path:hover,
 #circular_barplot path.hovered {
     stroke: black;
