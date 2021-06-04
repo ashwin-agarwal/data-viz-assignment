@@ -1215,7 +1215,7 @@ $(document).ready(function() {
         var svg = d3.select(plot_id).append("g"),
             width = $(plot_id).parent().width(),
             height = $(plot_id).parent().height(),
-            radius = (Math.min(width, height) / 2) * 0.65;
+            radius = (Math.min(width, height) / 2) * 0.6;
 
         // var color = d3.scaleOrdinal(d3.schemeCategory10);
         var color = (d3.schemeCategory10 + ',' + d3.schemePaired).split(',');
