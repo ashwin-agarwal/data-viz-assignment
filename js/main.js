@@ -407,6 +407,23 @@ $(document).ready(function() {
             .attr("text-anchor", "center")
             .style("alignment-baseline", "middle");
 
+        // Add X axis name
+        svg.append("text")
+            .attr("text-anchor", "end")
+            .attr("x", width)
+            .attr("y", height + 105)
+            .style("font-size", "18px")
+            .style("fill", "rgb(180, 180, 180)")
+            .text("Trending date");
+
+        svg.append("text")
+            .attr("text-anchor", "end")
+            .attr("x", -14)
+            .attr("y", -8)
+            .style("font-size", "18px")
+            .style("fill", "rgb(180, 180, 180)")
+            .text(sort_col.charAt().toUpperCase() + sort_col.slice(1));
+
         showPlot(plot_id);
     }
 
@@ -1381,13 +1398,13 @@ $(document).ready(function() {
             <li>There is equal number of trending videos for all 11 countries, which means that each country contributes equal data to the analysis and visualization.</li>
         </ul>`, `
         <ul>
-            <li>We can see that as views (bubble size) increase, the likes/comments also increase almost linearly. This shows a clear correlation between likes, views, comments.</li>
+            <li>We can see that as views (bubble size) increase, the likes/comments also increase almost linearly. This shows a clear correlation between likes, views, and comments.</li>
             <li>"News & Politics" are most disliked and commented categories in all of these countries. If a "News & Politics" category video trends, it is mostly because the video is talking about something really good or something ridiculously bad.</li>
             <li>In all countries, except Japan, "Music" videos have the highest views. Japan is the only country where the most viewed category is "Science & Technology".</li>
-            <li>People engage more in "Music" and "Comedy" videos. If a content creator is looking to target higher engagement videos, they should go for these categories.</li>
+            <li>People engage more in "Music" and "Comedy" videos. If a content creator is looking to target higher engagement videos, they should advertise in these categories.</li>
         </ul>`, `
         <ul>
-            <li>When looking from a views perspective, most channels with higher views are producing "Music" videos. World recognized artists such as Cardi B, DJ Khaled, BlackEyedPeas etc have higher views overall, and trend in most of these countries.</li>
+            <li>Most channels with higher views are producing "Music" videos. World recognized artists such as Cardi B, DJ Khaled, BlackEyedPeas etc have higher views overall, and trend in most of these countries.</li>
             <li>Basis the number of trending videos, channels like ColorsTV, Vijay Television, Sports Channels, etc that produce daily entertainment and sports videos trend more. Overall they have more trending videos, but at a given time, they have only 5-10 videos (as per the line chart).</li>
             <li>If a content creator is looking to tie up with channels that have more views, they should go with top music channels. However, if advertisement to the same set of people is the focus, then they could consider "Entertainment" and "Sports" category. This visualization makes it easy for content creators to identify the channels they should target based on their requirement.</li>
         </ul>`];
