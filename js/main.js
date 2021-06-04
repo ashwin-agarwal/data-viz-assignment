@@ -1380,7 +1380,7 @@ $(document).ready(function() {
         </ul>`, `
         <ul>
             <li>We can see that as views (bubble size) increase, the likes/comments also increase almost linearly. This shows a clear correlation between likes, views, comments.</li>
-            <li>"News & Politics" are most disliked and most commented categories in most of the countries. This trend appears particularly because if a "News & Politics" category video trends, it is mostly because the video is talking about something really good or something ridiculously bad.</li>
+            <li>"News & Politics" are most disliked and commented categories in all of these countries. If a "News & Politics" category video trends, it is mostly because the video is talking about something really good or something ridiculously bad.</li>
             <li>In all countries, except Japan, "Music" videos have the highest views. Japan is the only country where the most viewed category is "Science & Technology".</li>
             <li>People engage more in "Music" and "Comedy" videos. If a content creator is looking to target higher engagement videos, they should go for these categories.</li>
         </ul>`, `
