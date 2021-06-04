@@ -39,11 +39,11 @@ const cat_colors = {
 
 const country_colors = {
     "Brazil": "#3949AB",
-    "Canada": "#00897B",
+    "Canada": "#009900",
     "France": "#6D4C41",
-    "Germany": "#F4511E",
+    "Germany": "#FF5733",
     "India": "#D81B60",
-    "Japan": "#DD2C00",
+    "Japan": "#C70039",
     "Mexico": "#00ACC1",
     "Russia": "#8E24AA",
     "S Korea": "#FF9999",
