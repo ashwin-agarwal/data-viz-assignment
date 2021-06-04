@@ -334,3 +334,8 @@ text.doughnut_center {
     display: inline;
     float: right;
 }
+
+.bulb.hovered,
+.bulb:hover {
+    background: url(../images/lightbulb-hover.svg) no-repeat;
+}

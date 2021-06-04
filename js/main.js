@@ -1355,6 +1355,7 @@ $(document).ready(function() {
     });
 
     $('.interesting-insights').on("mouseover", function() {
+        $('.bulb').addClass('hovered');
         $('div.tooltip').html("<div class='text-center'>Click here for interesting insights</div>")
             .css({
                 "left": mouseposition.x - 100,
@@ -1369,6 +1370,7 @@ $(document).ready(function() {
                 "top": mouseposition.y - 100
             });
     }).on("mouseout", function() {
+        $('.bulb').removeClass('hovered');
         $('div.tooltip').css({ "opacity": 0, "display": "none" });
     }).on("click", function() {
 
