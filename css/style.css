@@ -1,3 +1,10 @@
+/*
+  Data Exploration Project
+  Author: Ashwin Agarwal  
+  Date created: 26-May-21
+  Last update: 5-Jun-21
+*/
+
 .bd-placeholder-img {
     font-size: 1.125rem;
     text-anchor: middle;
@@ -37,21 +44,16 @@
 
 #by-region,
 #by-channel {
-    /* background-color: #282828; */
     background-color: #1A1A1D;
 }
 
 #by-engagement,
 #references {
-    /* background-color: #757575; */
     background-color: #19181A;
-    /* background-color: #1F2833; */
-    /* background-color: #0B0C10; */
 }
 
 #home .intro {
     position: absolute;
-    /* padding-top: 84px; */
     top: 50%;
     left: 50%;
     -ms-transform: translate(-50%, -50%);
@@ -112,7 +114,6 @@ header h3 {
 .btn-learn-more {
     color: #333;
     text-shadow: none;
-    /* Prevent inheritance from `body` */
 }
 
 .btn-learn-more:hover {
@@ -120,15 +121,12 @@ header h3 {
 }
 
 .bg-custom {
+    /* image taken from wallpapersafari.com */
     background: url(../images/SX4JNp.png);
-    /* background: linear-gradient(rgba(255, 255, 255, .05), rgba(255, 255, 255, .05)), url("../images/SX4JNp.png"); */
-    /* background: url(../images/dark-3d-shapes-floor_1551645546.jpeg); */
     height: 100%;
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-    /* opacity: 0.6; */
-    /* background-color: #FF0000; */
 }
 
 a:hover {
@@ -136,15 +134,15 @@ a:hover {
 }
 
 .faded {
-    /*  Class that contains property of a faded element. */
-    /* stroke-opacity: 0.2; */
     opacity: 0.1 !important;
-    /* fill-opacity: 0.4; */
 }
 
 .highlight {
     opacity: 1 !important;
 }
+
+
+/* Visualization customizations */
 
 #bubble_map,
 #doughnut,
@@ -153,6 +151,7 @@ a:hover {
 #stacked_barchart,
 #circular_barplot,
 #line_chart {
+    /* hide visualizations div until they are ready */
     display: none;
 }
 

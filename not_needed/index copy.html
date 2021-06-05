@@ -1,0 +1,302 @@
+<!--
+  Data Exploration Project
+  Author: Ashwin Agarwal  
+  Date created: 26-May-21
+  Last update: 
+
+  References:  
+  - Cover page template inspired from Bootstrap: https://getbootstrap.com/docs/5.0/examples/cover/
+
+
+-->
+<!DOCTYPE html>
+<html lang="en" class="h-100 w-100">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=0.75">
+    <meta name="description" content="">
+    <title>Analyzing the trending videos on YouTube</title>
+
+    <script src="./js/jquery-3.6.0.min.js"></script>
+    <script src="./js/bootstrap.min.js"></script>
+    <script src="./js/main.js"></script>
+
+    <!-- Load d3.js and the geo projection plugin -->
+    <script src="./js/d3.v4.js"></script>
+    <script src="./js/d3-geo-projection.v2.min.js"></script>
+    <script src="./js/d3-scale-chromatic.v1.min.js"></script>
+    <script src="./js/d3-color.v1.min.js"></script>
+    <script src="./js/d3.layout.cloud.js"></script>
+    <script src="./js/d3-scale-radial.js"></script>
+
+    <link rel="stylesheet" href="./css/style.css" />
+    <link rel="stylesheet" href="./css/bootstrap.min.css" />
+    <link rel="shortcut icon" href="./images/favicon.ico" />
+
+</head>
+
+<body class="w-100">
+    <header class="mb-auto p-4 fixed-top bg-white">
+        <div>
+            <h3 class="float-md-start mb-0">YouTube Trends</h3>
+            <nav class="nav nav-masthead justify-content-center float-md-end">
+                <a class="nav-link" href="#home">Home</a>
+                <a class="nav-link" href="#by-region">By Region</a>
+                <a class="nav-link" href="#by-engagement">By Engagement</a>
+                <a class="nav-link" href="#by-channel">By Channel</a>
+            </nav>
+        </div>
+    </header>
+
+    <div id="pageLoadModal" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Best Experience</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+                </div>
+                <div class="modal-body">
+                    <p>For best experience, please view this webpage in fullscreen.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary btn-fullscreen">Go Fullscreen</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No, thanks!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <main>
+        <div id="home" class="bg-dark bg-custom text-center d-flex">
+            <div>
+                <h1>Analyzing the trending videos on YouTube</h1>
+                <p class="lead">This project analyzes the YouTube trending videos dataset from 6-Aug-20 to 7-Apr-21.<br/>The visualizations in this page will help content creators, looking to advertise or create <br/>content on/for YouTube, in targeting the right videos,
+                    channels, and categories.</p>
+                <p class="lead"><strong>For best experience, view the page in full screen.</strong></p>
+                <p class="lead">
+                    <a href="#" class="btn btn-lg btn-learn-more fw-bold border-white bg-white btn-fullscreen">Toggle Fullscreen</a>
+                </p>
+
+                <p>Project by: <a href="https://github.com/ashwin-agarwal/" target="_blank" class="text-white">Ashwin Agarwal</a> for FIT5147 Data exploration and visualization - S1 2021</p>
+            </div>
+        </div>
+        <div id="by-region">
+            <div class="p-4 h-100">
+                <div class="tooltip text-dark bg-white"></div>
+                <div class="row h-100">
+                    <div class="col-lg-8 h-100">
+                        <div style="height: 15%;">
+                            <h3>What kind of videos trend in each region?</h3>
+                            <p>This visualization shows the categories and tags that trend in each region. Click on the regions in the map to drill-down and see trending categories and tags for that particular region. Click the same region again to see the
+                                overall view.
+                            </p>
+                        </div>
+                        <div style="height: 85%;">
+                            <div class="d-flex justify-content-center h-100 align-items-center">
+                                <div class="spinner-border" role="status">
+                                </div>
+                            </div>
+                            <svg id="bubble_map" width="100%" height="100%"></svg>
+                        </div>
+                    </div>
+                    <div class="h-100 col">
+                        <div class="h-50">
+                            <div class="d-flex justify-content-center h-100 align-items-center">
+                                <div class="spinner-border" role="status">
+                                </div>
+                            </div>
+                            <svg id="doughnut" width="100%" height="100%"></svg>
+                        </div>
+                        <div class="h-50">
+                            <div class="d-flex justify-content-center h-100 align-items-center">
+                                <div class="spinner-border" role="status">
+                                </div>
+                            </div>
+                            <svg id="wordcloud" width="100%" height="100%"></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="by-engagement">
+            <div class="p-4 h-100">
+                <h3>How is the engagement of trending videos?</h3>
+                <p>The following visualizations show the engagement rate of trending videos by region and category. Notice the correlation between likes, comments, and views.
+                </p>
+                <p>Click the bubble of any region to see the engagement distribution (likes, comments, dislikes) for that region by category. Click the bubble again to see the overall view.</p>
+
+                <div class="tooltip text-dark bg-white"></div>
+
+                <div class="row" style="height: 80%; margin-top: 90px;">
+                    <div class="col h-100 mt-1">
+                        <div class="h-100">
+                            <div class="d-flex justify-content-center h-100 align-items-center">
+                                <div class="spinner-border" role="status">
+                                </div>
+                            </div>
+                            <svg id="bubble_plot" width="100%" height="100%"></svg>
+                        </div>
+                    </div>
+
+                    <div class="h-100 col">
+                        <div class="text-center d-print-inline sort_radio">
+                            <div class="form-check-inline">
+                                <span>SORT BY</span>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="sort_radio" id="likes" value="likes" checked>
+                                <label class="form-check-label" for="likes">Likes</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="sort_radio" id="comments" value="comments">
+                                <label class="form-check-label" for="comments">Comments</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="sort_radio" id="dislikes" value="dislikes">
+                                <label class="form-check-label" for="dislikes">Dislikes</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="sort_radio" id="views" value="views">
+                                <label class="form-check-label" for="views">Views</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="sort_radio" id="engagement_rate" value="engagement_rate">
+                                <label class="form-check-label" for="engagement_rate">Engagement Rate</label>
+                            </div>
+                        </div>
+                        <div class="h-100">
+                            <div class="d-flex justify-content-center h-100 align-items-center">
+                                <div class="spinner-border" role="status">
+                                </div>
+                            </div>
+                            <svg id="stacked_barchart" width="100%" height="100%"></svg>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+        <div id="by-channel">
+            <div class="p-4 h-100">
+                <div style="height: 20%;">
+                    <h3>Which channels have trending videos?</h3>
+                    <p>The following visualizations show information about the channels that have the most trending videos on the basis of your selection.
+                    </p>
+                    <p>Click the channel bar to see the distribution of trending videos by category and time for that specific channel. By default, the first channel is selected.</p>
+                </div>
+                <div class="tooltip text-dark bg-white"></div>
+
+                <div class="row" style="height: 80%;">
+                    <div class="h-100" style="width: 45%;">
+                        <div class="h-100">
+                            <div class="d-flex justify-content-center h-100 align-items-center">
+                                <div class="spinner-border" role="status">
+                                </div>
+                            </div>
+                            <svg id="circular_barplot" width="100%" height="100%"></svg>
+                        </div>
+                    </div>
+                    <div class="h-100 d-flex align-items-center user_interaction" style="width: 10%;">
+                        <div>
+                            <div class="top_channels">
+                                <div>
+                                    <span>BASIS</span>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="top_channels" id="radio-views" value="views" checked>
+                                    <label class="form-check-label" for="radio-views">Views</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="top_channels" id="radio-videos" value="videos">
+                                    <label class="form-check-label" for="radio-videos">Videos</label>
+                                </div>
+                            </div>
+                            <br/>
+                            <div class="country_select">
+                                <div>
+                                    <span>COUNTRIES</span>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-all" value="Overall" checked>
+                                    <label class="form-check-label" for="checkbox-all">All</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-brazil" value="Brazil" checked>
+                                    <label class="form-check-label" for="checkbox-brazil">Brazil</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-canada" value="Canada" checked>
+                                    <label class="form-check-label" for="checkbox-canada">Canada</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-france" value="France" checked>
+                                    <label class="form-check-label" for="checkbox-france">France</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-germany" value="Germany" checked>
+                                    <label class="form-check-label" for="checkbox-germany">Germany</label>
+                                </div>
+                                <div class="form-check">
+                                    <label class="form-check-label" for="checkbox-india">India</label>
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-india" value="India" checked>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-japan" value="Japan" checked>
+                                    <label class="form-check-label" for="checkbox-japan">Japan</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-mexico" value="Mexico" checked>
+                                    <label class="form-check-label" for="checkbox-mexico">Mexico</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-russia" value="Russia" checked>
+                                    <label class="form-check-label" for="checkbox-russia">Russia</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-skorea" value="S Korea" checked>
+                                    <label class="form-check-label" for="checkbox-skorea">S Korea</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-uk" value="UK" checked>
+                                    <label class="form-check-label" for="checkbox-uk">UK</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="country_select" id="checkbox-usa" value="USA" checked>
+                                    <label class="form-check-label" for="checkbox-usa">USA</label>
+                                </div>
+                            </div>
+                            <br/>
+                            <div class="slidercontainer">
+                                <label for="channelN" class="form-label">CHANNELS (<span id="channel_count">30</span>)</label>
+                                <input type="range" min="5" max="100" step="1" id="channelN" value="30" oninput="sliderChange(this.value)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="h-100" style="width: 45%;">
+                        <div class="h-100">
+                            <div class="d-flex justify-content-center h-100 align-items-center">
+                                <div class="spinner-border" role="status">
+                                </div>
+                            </div>
+                            <svg id="line_chart" width="100%" height="100%"></svg>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+
+</body>
+
+</html>
